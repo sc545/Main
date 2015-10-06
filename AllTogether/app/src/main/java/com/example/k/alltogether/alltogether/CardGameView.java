@@ -12,40 +12,73 @@ import android.widget.Toast;
 
 import com.example.k.alltogether.R;
 
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Stack;
+
 /**
  * Created by K on 2015-10-06.
  */
 public class CardGameView extends View {
     Bitmap m_BackGroundImage, m_Star;
     Canvas can;
-
+    Rect rect;
+    int c=0;
+    ArrayList<Rect> arrayList;
     public CardGameView(Context context) {
         super(context);
         m_BackGroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.background);
         m_Star = BitmapFactory.decodeResource(getResources(), R.drawable.star);
+        arrayList = new ArrayList<Rect>();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         can = canvas;
         can.drawBitmap(m_BackGroundImage, 0, 0, null);
+
+        switch (c){
+            case 0:
+                for(int i=0; i<10; i++) {
+                    //can.drawCircle(500 + x * 90, 650 + y * 130, 35, new Paint());
+                    int a = (int) (Math.random()*255);
+                    int b = (int) (Math.random()*255);
+                    rect = new Rect(10 + 1 * a, 20 + 2 * b, 30 + 1 * a, 40 + 2 * b);
+                    arrayList.add(i, rect);
+                    can.drawRect(rect, new Paint());
+                }
+                break;
+            default:
+                for(int i=0; i<arrayList.size(); i++)
+                    can.drawRect(arrayList.get(i), new Paint());
+                break;
+        }
+
+
+        /*
         for(int y=0; y<2; y++)
-            for(int x=0; x<3; x++)
-                can.drawCircle(500 + x * 90, 650 + y * 130, 35, new Paint());
+            for(int x=0; x<3; x++) {
+                //can.drawCircle(500 + x * 90, 650 + y * 130, 35, new Paint());
+                rect[y][x] = new Rect(10 + x * 150, 20 + y * 150, 30 + x * 150, 40 + y * 150);
+                can.drawRect(rect[y][x], new Paint());
+            }
+            */
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int px = (int) event.getX();
         int py = (int) event.getY();
-        for(int y=0; y<2; y++){
-            for(int x=0; x<3; x++){
-                Rect r = new Rect(500+x*90, 650+y*130, 500+x*90+80, 650+y*130+115);
-                if(r.contains(px, py))
-                    Toast.makeText(MainActivity.main, "성공", Toast.LENGTH_LONG).show();
+
+
+        for(int i=0; i<arrayList.size(); i++){
+            if(arrayList.get(i).contains(px, py)) {
+                arrayList.remove(i);
+                String tmp="성공"+(++c);
+                Toast.makeText(MainActivity.main, tmp, Toast.LENGTH_SHORT).show();
+                invalidate();
             }
         }
-        invalidate();
         return true;
     }
 }
