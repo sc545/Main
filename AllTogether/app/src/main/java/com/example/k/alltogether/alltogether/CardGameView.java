@@ -20,7 +20,7 @@ import java.util.Stack;
  * Created by K on 2015-10-06.
  */
 public class CardGameView extends View {
-    Bitmap m_BackGroundImage, m_Star;
+    Bitmap m_BackGroundImage, m_Star, m_Bubble;
     Canvas can;
     Rect rect;
     int c=0;
@@ -29,6 +29,7 @@ public class CardGameView extends View {
         super(context);
         m_BackGroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.background);
         m_Star = BitmapFactory.decodeResource(getResources(), R.drawable.star);
+        m_Bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
         arrayList = new ArrayList<Rect>();
     }
 
@@ -46,12 +47,14 @@ public class CardGameView extends View {
                     int b = (int) (Math.random()*800);
                     rect = new Rect(10 + 1 * a, 20 + 2 * b, 100 + 1 * a, 110 + 2 * b);
                     arrayList.add(i, rect);
-                    can.drawRect(rect, new Paint());
+                    //can.drawRect(rect, new Paint());
+                    can.drawBitmap(m_Bubble, null, rect, new Paint());
                 }
                 break;
             default:
                 for(int i=0; i<arrayList.size(); i++)
-                    can.drawRect(arrayList.get(i), new Paint());
+//                    can.drawRect(arrayList.get(i), new Paint());
+                    can.drawBitmap(m_Bubble, null, arrayList.get(i), new Paint());
                 break;
         }
 
