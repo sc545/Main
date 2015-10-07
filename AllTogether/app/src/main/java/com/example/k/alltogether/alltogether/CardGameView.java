@@ -36,14 +36,15 @@ public class CardGameView extends View {
     protected void onDraw(Canvas canvas) {
         can = canvas;
         can.drawBitmap(m_BackGroundImage, 0, 0, null);
-
+        if(arrayList.size()==0)
+            c=0;
         switch (c){
             case 0:
                 for(int i=0; i<10; i++) {
                     //can.drawCircle(500 + x * 90, 650 + y * 130, 35, new Paint());
-                    int a = (int) (Math.random()*255);
-                    int b = (int) (Math.random()*255);
-                    rect = new Rect(10 + 1 * a, 20 + 2 * b, 30 + 1 * a, 40 + 2 * b);
+                    int a = (int) (Math.random()*600);
+                    int b = (int) (Math.random()*800);
+                    rect = new Rect(10 + 1 * a, 20 + 2 * b, 100 + 1 * a, 110 + 2 * b);
                     arrayList.add(i, rect);
                     can.drawRect(rect, new Paint());
                 }
