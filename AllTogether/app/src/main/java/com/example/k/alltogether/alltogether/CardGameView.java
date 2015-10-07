@@ -64,8 +64,8 @@ public class CardGameView extends View {
                     */
                     int a = (int) (Math.random()*screenWidth); //1079
                     int b = (int) (Math.random()*screenHeight);//1844
-                    rect = new Rect((0 + a)%screenWidth, (10 + b)%screenHeight, (190 + a)%screenWidth, (200 + b)%screenHeight);
-                    String tmp = (0 + a)%screenWidth+", "+(10 + b)%screenHeight+", "+(190 + a)%screenWidth+", "+(200 + b)%screenHeight;
+                    rect = new Rect((0 + a)%screenWidth, (0 + b)%screenHeight, (100 + a)%screenWidth, (100 + b)%screenHeight);
+                    String tmp = (0 + a)%screenWidth+", "+(0 + b)%screenHeight+", "+(150 + a)%screenWidth+", "+(150 + b)%screenHeight;
                     Toast.makeText(getContext(), tmp, Toast.LENGTH_SHORT).show();
                     arrayList.add(i, rect);
                     //can.drawRect(rect, new Paint());
