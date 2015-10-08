@@ -4,10 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.k.alltogether.R;
@@ -24,37 +27,60 @@ public class CardGameView extends View {
     Canvas can;
     Rect rect;
     int c=0;
+    int screenWidth, screenHeight;
     ArrayList<Rect> arrayList;
     public CardGameView(Context context) {
         super(context);
-        m_BackGroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.background);
+
+        m_BackGroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.stage_background);
         m_Star = BitmapFactory.decodeResource(getResources(), R.drawable.star);
         m_Bubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble);
+
         arrayList = new ArrayList<Rect>();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         can = canvas;
-        can.drawBitmap(m_BackGroundImage, 0, 0, null);
+        screenWidth = (int) (can.getWidth()*0.5);   //1080
+        screenHeight = (int) (can.getHeight()*0.5); //1845
+        Bitmap resize_bitmap = Bitmap.createScaledBitmap(m_BackGroundImage, can.getWidth(), can.getHeight(), true);
+        can.drawBitmap(resize_bitmap, 0, 0, new Paint());
         if(arrayList.size()==0)
             c=0;
         switch (c){
             case 0:
                 for(int i=0; i<10; i++) {
                     //can.drawCircle(500 + x * 90, 650 + y * 130, 35, new Paint());
-                    int a = (int) (Math.random()*600);
-                    int b = (int) (Math.random()*800);
-                    rect = new Rect(10 + 1 * a, 20 + 2 * b, 100 + 1 * a, 110 + 2 * b);
+                    int w = getContext().getResources().getDisplayMetrics().widthPixels;
+                    int h = getContext().getResources().getDisplayMetrics().heightPixels;
+
+                    //String tmp = screenWidth+", "+screenHeight+" "+w+", "+h;
+                    //Toast.makeText(getContext(), tmp, Toast.LENGTH_SHORT).show();
+                    /*
+                    int a = (int) (Math.random()*w);
+                    int b = (int) (Math.random()*h);
+                    rect = new Rect((0 + a)%w, (10 + b)%h, (190 + a)%w, (200 + b)%h);
+                    */
+                    int a = (int) (Math.random()*screenWidth); //1079
+                    int b = (int) (Math.random()*screenHeight);//1844
+                    rect = new Rect((0 + a)%screenWidth, (10 + b)%screenHeight, (190 + a)%screenWidth, (200 + b)%screenHeight);
+                    String tmp = (0 + a)%screenWidth+", "+(10 + b)%screenHeight+", "+(190 + a)%screenWidth+", "+(200 + b)%screenHeight;
+                    Toast.makeText(getContext(), tmp, Toast.LENGTH_SHORT).show();
                     arrayList.add(i, rect);
                     //can.drawRect(rect, new Paint());
-                    can.drawBitmap(m_Bubble, null, rect, new Paint());
+                    Paint p = new Paint();
+                    p.setColor(Color.RED);
+                    can.drawRect(rect, p);
+                    can.drawBitmap(m_Bubble, null, rect, p);
                 }
                 break;
             default:
-                for(int i=0; i<arrayList.size(); i++)
+                for(int i=0; i<arrayList.size(); i++) {
 //                    can.drawRect(arrayList.get(i), new Paint());
+
                     can.drawBitmap(m_Bubble, null, arrayList.get(i), new Paint());
+                }
                 break;
         }
 
