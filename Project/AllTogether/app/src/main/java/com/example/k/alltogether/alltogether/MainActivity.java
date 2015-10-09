@@ -1,9 +1,12 @@
 package com.example.k.alltogether.alltogether;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import com.example.k.alltogether.R;
 
@@ -12,9 +15,13 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(new CardGameView(this));
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LinearLayout activity_main = (LinearLayout)inflater.inflate(R.layout.activity_main, null);
+
+//        setContentView(new GameView(this));
+//        setContentView(activity_main);
         main = this;
-        //setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
     }
 
     @Override
