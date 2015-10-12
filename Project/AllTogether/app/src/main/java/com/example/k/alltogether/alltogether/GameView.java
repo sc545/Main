@@ -82,8 +82,8 @@ public class GameView extends View {
         int screenHeight = (int) canvas.getHeight(); //1845
 //        int screenWidth = layout.getWidth();
 //        int screenHeight = layout.getHeight();
-        //m_BackGroundImage = Bitmap.createScaledBitmap(m_BackGroundImage, canvas.getWidth(), canvas.getHeight(), true);
-        //canvas.drawBitmap(m_BackGroundImage, 0, 0, new Paint());
+        m_BackGroundImage = Bitmap.createScaledBitmap(m_BackGroundImage, canvas.getWidth(), canvas.getHeight(), false);
+        canvas.drawBitmap(m_BackGroundImage, 0, 0, new Paint());
         if(arrayList.size()==0)
             c=0;
         switch (c){
@@ -93,7 +93,7 @@ public class GameView extends View {
                     int a = (int) (Math.random()*screenWidth); //1079
                     int b = (int) (Math.random()*screenHeight);//1844
 
-                    Bubble bubble = new Bubble(a, b, 100);
+                    Bubble bubble = new Bubble(a, b, 50);
 
                     arrayList.add(i, bubble);
                     canvas.drawBitmap(bubble.imgBubble, bubble.x - bubble.r, bubble.y-bubble.r, new Paint());

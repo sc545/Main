@@ -18,10 +18,10 @@ public class MainActivity extends Activity {
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout activity_main = (LinearLayout)inflater.inflate(R.layout.activity_main, null);
 
-//        setContentView(new GameView(this));
+        setContentView(new GameView(this));
 //        setContentView(activity_main);
         main = this;
-        setContentView(R.layout.activity_main);
+//        setContentView(R.layout.activity_main);
     }
 
     @Override
