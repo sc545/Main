@@ -24,7 +24,9 @@ import java.util.jar.Attributes;
  */
 public class GameView extends View {
     Bitmap m_BackGroundImage;
-    int c=0;
+    int combo=0;
+    boolean comboFlag=false;
+    boolean gameState=false;
     ArrayList<Bubble> arrayList;
 
 //    LinearLayout layout;
@@ -77,34 +79,60 @@ public class GameView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        int screenWidth = (int) canvas.getWidth();   //1080
-        int screenHeight = (int) canvas.getHeight(); //1845
+    protected void onDraw(final Canvas canvas) {
+        final int screenWidth = (int) canvas.getWidth();   //1080
+        final int screenHeight = (int) canvas.getHeight(); //1845
 //        int screenWidth = layout.getWidth();
 //        int screenHeight = layout.getHeight();
         m_BackGroundImage = Bitmap.createScaledBitmap(m_BackGroundImage, canvas.getWidth(), canvas.getHeight(), false);
         canvas.drawBitmap(m_BackGroundImage, 0, 0, new Paint());
-        if(arrayList.size()==0)
-            c=0;
-        switch (c){
-            case 0:
-                for(int i=0; i<10; i++) {
 
-                    int a = (int) (Math.random()*screenWidth); //1079
-                    int b = (int) (Math.random()*screenHeight);//1844
+        if(arrayList.size()==0)
+            gameState=false;
+
+
+/*
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                    int a = (int) (Math.random() * screenWidth); //1079
+                    int b = (int) (Math.random() * screenHeight);//1844
 
                     Bubble bubble = new Bubble(a, b, 50);
 
-                    arrayList.add(i, bubble);
-                    canvas.drawBitmap(bubble.imgBubble, bubble.x - bubble.r, bubble.y-bubble.r, new Paint());
-                }
-                break;
-            default:
-                for(int i=0; i<arrayList.size(); i++) {
-                    Bubble bubble = arrayList.get(i);
-                    canvas.drawBitmap(bubble.imgBubble, bubble.x - bubble.r, bubble.y-bubble.r, new Paint());
-                }
-                break;
+                    arrayList.add(bubble);
+
+                    gameState = true;
+                }catch (Throwable t){}
+            }
+        });
+        thread.start();
+        for(int i=0; i<arrayList.size(); i++) {
+            Bubble bubble = arrayList.get(i);
+            canvas.drawBitmap(bubble.imgBubble, bubble.x - bubble.r, bubble.y-bubble.r, new Paint());
+        }
+*/
+
+        if(!gameState){
+            for(int i=0; i<10; i++) {
+
+                int a = (int) (Math.random()*screenWidth); //1079
+                int b = (int) (Math.random()*screenHeight);//1844
+
+                Bubble bubble = new Bubble(a, b, 50);
+
+                arrayList.add(i, bubble);
+                canvas.drawBitmap(bubble.imgBubble, bubble.x - bubble.r, bubble.y-bubble.r, new Paint());
+
+                gameState=true;
+            }
+        }else{
+            for(int i=0; i<arrayList.size(); i++) {
+                Bubble bubble = arrayList.get(i);
+                canvas.drawBitmap(bubble.imgBubble, bubble.x - bubble.r, bubble.y-bubble.r, new Paint());
+            }
         }
     }
 
@@ -113,14 +141,27 @@ public class GameView extends View {
         int px = (int) event.getX();
         int py = (int) event.getY();
 
-        for(int i=0; i<arrayList.size(); i++){
-            if(arrayList.get(i).contains(px, py)) {
-                arrayList.remove(i);
-                String tmp="성공"+(++c);
+        if(event.getAction() == MotionEvent.ACTION_DOWN){
+            for(int i=0; i<arrayList.size(); i++){
+                if (arrayList.get(i).contains(px, py)) {
+                    arrayList.remove(i);
+                    comboFlag=true;
+                    invalidate();
+                    break;
+                }else {
+                    comboFlag = false;
+                }
+            }
+            if(comboFlag){
+                String tmp = (++combo)+" COMBO!!";
                 Toast.makeText(MainActivity.main, tmp, Toast.LENGTH_SHORT).show();
-                invalidate();
+            }else{
+                combo=0;
+                String tmp = "콤보 실패!!";
+                Toast.makeText(MainActivity.main, tmp, Toast.LENGTH_SHORT).show();
             }
         }
+
         return true;
     }
 }
