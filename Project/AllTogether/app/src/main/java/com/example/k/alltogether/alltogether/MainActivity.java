@@ -10,18 +10,26 @@ import android.widget.LinearLayout;
 
 import com.example.k.alltogether.R;
 
+import java.util.ArrayList;
+
 public class MainActivity extends Activity {
     static Activity main;
+    static boolean gameState=false;
+    static ArrayList<GameView.Bubble> arrayList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        arrayList = new ArrayList<GameView.Bubble>();
+
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout activity_main = (LinearLayout)inflater.inflate(R.layout.activity_main, null);
 
         setContentView(new GameView(this));
 //        setContentView(activity_main);
-        main = this;
 //        setContentView(R.layout.activity_main);
+        main = this;
     }
 
     @Override

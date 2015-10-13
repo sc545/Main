@@ -26,19 +26,12 @@ public class GameView extends View {
     Bitmap m_BackGroundImage;
     int combo=0;
     boolean comboFlag=false;
-    boolean gameState=false;
-    ArrayList<Bubble> arrayList;
-
-//    LinearLayout layout;
+    boolean gameState=MainActivity.gameState;
+    ArrayList<Bubble> arrayList = MainActivity.arrayList;
 
     public GameView(Context context) {
         super(context);
-
         m_BackGroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.stage_background);
-
-        arrayList = new ArrayList<Bubble>();
-
-
 
         /*
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -71,25 +64,21 @@ public class GameView extends View {
         }
 
         public boolean contains(int x, int y){
-            if(Math.pow(this.x-x, 2)+Math.pow(this.y-y, 2) <= Math.pow(r, 2))
-                return true;
-            return false;
+            return Math.pow(this.x-x, 2)+Math.pow(this.y-y, 2) <= Math.pow(r, 2);
         }
 
     }
 
     @Override
     protected void onDraw(final Canvas canvas) {
-        final int screenWidth = (int) canvas.getWidth();   //1080
-        final int screenHeight = (int) canvas.getHeight(); //1845
-//        int screenWidth = layout.getWidth();
-//        int screenHeight = layout.getHeight();
+        int screenWidth = canvas.getWidth();
+        int screenHeight = canvas.getHeight();
+
         m_BackGroundImage = Bitmap.createScaledBitmap(m_BackGroundImage, canvas.getWidth(), canvas.getHeight(), false);
         canvas.drawBitmap(m_BackGroundImage, 0, 0, new Paint());
 
         if(arrayList.size()==0)
             gameState=false;
-
 
 /*
         final Thread thread = new Thread(new Runnable() {
@@ -118,8 +107,8 @@ public class GameView extends View {
         if(!gameState){
             for(int i=0; i<10; i++) {
 
-                int a = (int) (Math.random()*screenWidth); //1079
-                int b = (int) (Math.random()*screenHeight);//1844
+                int a = (int) (Math.random()*screenWidth);
+                int b = (int) (Math.random()*screenHeight);
 
                 Bubble bubble = new Bubble(a, b, 50);
 
