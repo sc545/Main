@@ -4,20 +4,15 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.k.alltogether.R;
 
 import java.util.ArrayList;
-import java.util.jar.Attributes;
 
 /**
  * Created by K on 2015-10-06.
@@ -26,8 +21,8 @@ public class GameView extends View {
     Bitmap m_BackGroundImage;
     int combo=0;
     boolean comboFlag=false;
-    boolean gameState=MainActivity.gameState;
-    ArrayList<Bubble> arrayList = MainActivity.arrayList;
+    boolean gameState= GameStageActivity.gameState;
+    ArrayList<Bubble> arrayList = GameStageActivity.arrayList;
 
     public GameView(Context context) {
         super(context);
@@ -35,10 +30,10 @@ public class GameView extends View {
 
         /*
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View activity_main = (LinearLayout)inflater.inflate(R.layout.activity_main, null);
-        layout = (LinearLayout) activity_main.findViewById(R.id.layout_stage);
+        View game_stage_activity = (LinearLayout)inflater.inflate(R.layout.game_stage_activity, null);
+        layout = (LinearLayout) game_stage_activity.findViewById(R.id.layout_stage);
 
-        LinearLayout layout_main = (LinearLayout) activity_main.findViewById(R.id.layout_main);
+        LinearLayout layout_main = (LinearLayout) game_stage_activity.findViewById(R.id.layout_main);
     `   */
         // inflater로 xml로 만든 레이아웃을 가져와서 적용시킬순 없을까?
 
@@ -143,11 +138,11 @@ public class GameView extends View {
             }
             if(comboFlag){
                 String tmp = (++combo)+" COMBO!!";
-                Toast.makeText(MainActivity.main, tmp, Toast.LENGTH_SHORT).show();
+                Toast.makeText(GameStageActivity.main, tmp, Toast.LENGTH_SHORT).show();
             }else{
                 combo=0;
                 String tmp = "콤보 실패!!";
-                Toast.makeText(MainActivity.main, tmp, Toast.LENGTH_SHORT).show();
+                Toast.makeText(GameStageActivity.main, tmp, Toast.LENGTH_SHORT).show();
             }
         }
 
