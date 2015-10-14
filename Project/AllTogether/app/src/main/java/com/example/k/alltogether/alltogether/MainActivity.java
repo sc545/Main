@@ -44,6 +44,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), GameStageActivity.class);
                 startActivity(i);
+                finish();
             }
         });
     }
