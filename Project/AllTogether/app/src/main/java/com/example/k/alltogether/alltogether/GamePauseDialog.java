@@ -13,22 +13,31 @@ import com.example.k.alltogether.R;
 /**
  * Created by K on 2015-10-15.
  */
-public class GameOverDialog extends Dialog {
+public class GamePauseDialog extends Dialog {
     GameStageActivity gameStageActivity;
-    ImageButton btnReplay, btnMain;
+    ImageButton btnReplay, btnAgain, btnMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.game_over_dialog);
+        setContentView(R.layout.game_pause_dialog);
 
-        btnReplay = (ImageButton) findViewById(R.id.btnGameOverRePlay);
-        btnMain = (ImageButton) findViewById(R.id.btnGameOverMain);
+        btnReplay = (ImageButton) findViewById(R.id.btnGamePauseRePlay);
+        btnAgain = (ImageButton) findViewById(R.id.btnGamePauseAgain);
+        btnMain = (ImageButton) findViewById(R.id.btnGamePauseMain);
 
         btnReplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 gameStageActivity.arrayList.clear();
+                dismiss();
+                gameStageActivity.gameState=true;
+            }
+        });
+
+        btnAgain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 dismiss();
                 gameStageActivity.gameState=true;
             }
@@ -44,7 +53,7 @@ public class GameOverDialog extends Dialog {
         });
     }
 
-    public GameOverDialog(Context context, GameStageActivity gameStageActivity) {
+    public GamePauseDialog(Context context, GameStageActivity gameStageActivity) {
         super(context);
         this.gameStageActivity = gameStageActivity;
     }

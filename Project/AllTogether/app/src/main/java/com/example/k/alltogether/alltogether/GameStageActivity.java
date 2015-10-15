@@ -25,10 +25,12 @@ import java.util.ArrayList;
 public class GameStageActivity extends Activity {
     GameStageActivity gameStageActivity;
     boolean gameState; // 게임 진행 상태를 담을 변수
+    boolean threadState; // 스레드 상태를 담을 변수
     ArrayList<GameView.Bubble> arrayList; // 게임 속에서 생성되는 버블 객체를 가지고 있을 ArrayList
     int screenWidth, screenHeight; // 스마트폰 화면 사이즈를 담을 변수
     GameView.GameThread myThread; // 버블 객체를 생성해 줄 스레드
     GameOverDialog gameOverDialog;
+    GamePauseDialog gamePauseDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,14 +41,17 @@ public class GameStageActivity extends Activity {
         screenWidth = getApplicationContext().getResources().getDisplayMetrics().widthPixels; // 스마트폰 화면 사이즈 가져오는 함수
         screenHeight = getApplicationContext().getResources().getDisplayMetrics().heightPixels;
         gameOverDialog = new GameOverDialog(this, gameStageActivity);
+        gamePauseDialog = new GamePauseDialog(this, gameStageActivity);
+/*
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         // xml 레이아웃을 자바로 가져와서 객체화 시켜 줄 수 있는 인플레이터 변수 선언
         LinearLayout activity_main = (LinearLayout)inflater.inflate(R.layout.game_stage_activity, null);
         // 인플레이터 변수를 사용해서 xml 레이아웃 객체화
 
+*/
         setContentView(new GameView(this)); // GameStageActivity 에 화면(View)를 담당해줄 GameView 등록
-
+        threadState = true;
         myThread.start(); // 버블을 생성시켜 줄 스레드 시작
 
     }
@@ -120,22 +125,24 @@ public class GameStageActivity extends Activity {
                 handler = new Handler();
             }
             public void run(){
-                while(gameState) {
-                    try {
-                        Thread.sleep(500); // 스레드가 0.5초 동안 잠든다 => 0.5초 간격으로 버블 생성
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    int x = (int) (Math.random() * screenWidth);
-                    int y = (int) (Math.random() * screenHeight);
-                    arrayList.add(new Bubble(x, y, 100));
-
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            invalidate(); // 핸들러를 통해서 화면 갱신
+                while(threadState) {
+                    if(gameState) {
+                        try {
+                            Thread.sleep(500); // 스레드가 0.5초 동안 잠든다 => 0.5초 간격으로 버블 생성
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
-                    });
+                        int x = (int) (Math.random() * screenWidth);
+                        int y = (int) (Math.random() * screenHeight);
+                        arrayList.add(new Bubble(x, y, 100));
+
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                invalidate(); // 핸들러를 통해서 화면 갱신
+                            }
+                        });
+                    }
                 }
 
             }
@@ -179,18 +186,14 @@ public class GameStageActivity extends Activity {
 
             if(arrayList.size()==0){ // 게임 성공시
                 gameState = false;
+                Toast.makeText(getApplicationContext(), "성공!! 다이얼로그 미구현", Toast.LENGTH_SHORT).show();
             }
 
             if(gameState){
                 for(int i=0; i<arrayList.size(); i++) {
-
                     Bubble bubble = arrayList.get(i);
-
                     canvas.drawBitmap(bubble.imgBubble, bubble.x - bubble.r, bubble.y-bubble.r, paint);
-
                 }
-            }else{
-                gameOverDialog.show();
             }
 
         }
@@ -227,7 +230,8 @@ public class GameStageActivity extends Activity {
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {// 뒤로가기 누를시
-
+            gameState=false;
+            gamePauseDialog.show();
         }
         return false;
     }

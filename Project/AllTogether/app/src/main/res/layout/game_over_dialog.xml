@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1">
         <ImageButton
-            android:id="@+id/btnRePlay"
+            android:id="@+id/btnGameOverRePlay"
             android:layout_width="110dp"
             android:layout_height="110dp"
             android:background="@drawable/game_over_replay_selector"
@@ -23,7 +23,7 @@
 
 
         <ImageButton
-            android:id="@+id/btnMain"
+            android:id="@+id/btnGameOverMain"
             android:layout_width="110dp"
             android:layout_height="110dp"
             android:background="@drawable/game_over_main_selector"
