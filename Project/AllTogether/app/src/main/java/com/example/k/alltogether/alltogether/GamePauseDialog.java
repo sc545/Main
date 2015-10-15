@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -21,6 +22,7 @@ public class GamePauseDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.game_pause_dialog);
+        setCanceledOnTouchOutside(false);
 
         btnReplay = (ImageButton) findViewById(R.id.btnGamePauseRePlay);
         btnAgain = (ImageButton) findViewById(R.id.btnGamePauseAgain);
@@ -56,5 +58,13 @@ public class GamePauseDialog extends Dialog {
     public GamePauseDialog(Context context, GameStageActivity gameStageActivity) {
         super(context);
         this.gameStageActivity = gameStageActivity;
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {// 뒤로가기 누를시
+            dismiss();
+            gameStageActivity.gameState=true;
+        }
+        return false;
     }
 }

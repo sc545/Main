@@ -21,6 +21,7 @@ public class GameOverDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.game_over_dialog);
+        setCanceledOnTouchOutside(false);
 
         btnReplay = (ImageButton) findViewById(R.id.btnGameOverRePlay);
         btnMain = (ImageButton) findViewById(R.id.btnGameOverMain);
