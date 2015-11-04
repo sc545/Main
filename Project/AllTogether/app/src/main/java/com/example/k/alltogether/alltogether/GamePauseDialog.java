@@ -32,6 +32,8 @@ public class GamePauseDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 gameStageActivity.arrayList.clear();
+                gameStageActivity.score=0;
+                gameStageActivity.combo=0;
                 dismiss();
                 gameStageActivity.gameState=true;
             }
