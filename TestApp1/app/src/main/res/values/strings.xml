@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name">TestApp1</string>
-    <string name="MainTest">메인아 잘나와라</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-</resources>
