@@ -31,9 +31,7 @@ public class GamePauseDialog extends Dialog {
         btnReplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gameStageActivity.arrayList.clear();
-                gameStageActivity.score=0;
-                gameStageActivity.combo=0;
+                gameStageActivity.resetState();
                 dismiss();
                 gameStageActivity.gameState=true;
             }
