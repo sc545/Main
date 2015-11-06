@@ -8,12 +8,12 @@ import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
-
 import com.example.k.alltogether.R;
 
 /**
  * Created by K on 2015-10-15.
  */
+
 public class GamePauseDialog extends Dialog {
     GameStageActivity gameStageActivity;
     ImageButton btnReplay, btnAgain, btnMain;
