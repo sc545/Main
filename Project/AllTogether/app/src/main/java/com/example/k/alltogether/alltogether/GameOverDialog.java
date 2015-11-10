@@ -29,6 +29,7 @@ public class GameOverDialog extends Dialog {
         btnReplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                gameStageActivity.resetState();
                 dismiss();
                 gameStageActivity.gameState=true;
             }
