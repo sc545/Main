@@ -8,12 +8,12 @@ import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
-
 import com.example.k.alltogether.R;
 
 /**
  * Created by K on 2015-10-15.
  */
+
 public class GamePauseDialog extends Dialog {
     GameStageActivity gameStageActivity;
     ImageButton btnReplay, btnAgain, btnMain;
@@ -31,9 +31,7 @@ public class GamePauseDialog extends Dialog {
         btnReplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gameStageActivity.arrayList.clear();
-                gameStageActivity.score=0;
-                gameStageActivity.combo=0;
+                gameStageActivity.resetState();
                 dismiss();
                 gameStageActivity.gameState=true;
             }
