@@ -26,8 +26,11 @@ import android.widget.Toast;
 
 import com.example.k.alltogether.R;
 
-import java.text.Format;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class GameStageActivity extends Activity {
     GameStageActivity gameStageActivity;
@@ -36,27 +39,29 @@ public class GameStageActivity extends Activity {
     boolean feverState; // 피버 상태를 담을 변수
     boolean comboState; // 게임 중 콤보상태를 담을 변수 선언
     boolean bombBubbleState; // 폭탄 버블 생성 여부를 담을 변수 선언
-    boolean animationState;
+    boolean animationState[];
     boolean animationTempState;
     boolean comboDraw;
-    int animaitionCount;
+
     int combo; // 게임 중 몇 콤보 수를 담을 변수 선언
     int score; // 게임 중 몇 점수를 담을 변수 선언
-    GameView.Bubble oldBubble;
-    ArrayList<GameView.Bubble> arrayList; // 게임 속에서 생성되는 버블 객체를 가지고 있을 ArrayList
-    ArrayList<Thread> threadArrayList;
+    int bubbleRadius;
     int screenWidth, screenHeight; // 스마트폰 화면 사이즈를 담을 변수
 
+    GameView.Bubble newBubble, oldBubble, newBombBubble;
+    ArrayList<GameView.Bubble> arrayList; // 게임 속에서 생성되는 버블 객체를 가지고 있을 ArrayList
+
+
+    ThreadPoolExecutor threadPoolExecutor;
     GameView.BubbleThread bubbleThread; // 버블 객체를 생성해 줄 스레드
-    GameView.BumbBubbleThread bumbBubbleThread; // 버블 객체를 생성해 줄 스레드
     GameView.AnimationThread animationThread;
     GameView.AnimationTempThread animationTempThread;
-    GameView.ComboThread comboThread;
     GameOverDialog gameOverDialog;
     GamePauseDialog gamePauseDialog;
     Rect rectBubbleArea;
     Point point[];
     Vibrator vibrator;
+
     ProgressBar pbLife;
     Button btnPause;
     TextView tvScore, tvCombo;
@@ -65,12 +70,17 @@ public class GameStageActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        threadPoolExecutor = new ThreadPoolExecutor(5, 5, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         gameStageActivity=this;
         gameState=true; // GameStageActivity 가 생성 될 때 게임 진행 상태를 true 로 변경
         arrayList = new ArrayList<GameView.Bubble>(); // arrayList 객체 생성
-        threadArrayList = new ArrayList<Thread>();
         screenWidth = getApplicationContext().getResources().getDisplayMetrics().widthPixels; // 스마트폰 화면 사이즈 가져오는 함수
         screenHeight = getApplicationContext().getResources().getDisplayMetrics().heightPixels;
+
+        animationState = new boolean[4];
+
+        bubbleRadius = screenWidth/10;
+
         gameOverDialog = new GameOverDialog(this, gameStageActivity);
         gamePauseDialog = new GamePauseDialog(this, gameStageActivity);
         rectBubbleArea = new Rect();
@@ -93,28 +103,16 @@ public class GameStageActivity extends Activity {
         point[3].x = endX; point[3].y = endY;
         rectBubbleArea.set(point[0].x, point[0].y, point[3].x, point[3].y);
 
-
-/*
-
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        // xml 레이아웃을 자바로 가져와서 객체화 시켜 줄 수 있는 인플레이터 변수 선언
-        LinearLayout activity_main = (LinearLayout)inflater.inflate(R.layout.stage_background, null);
-        // 인플레이터 변수를 사용해서 xml 레이아웃 객체화
-
-*/
         GameView gameView = new GameView(this);
-
-
-
-
+//        setContentView(gameView);
         addContentView(gameView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View layout = (View)inflater.inflate(R.layout.game_stage, null);
-
-
-
         layout.setFocusable(true);
         addContentView(layout, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+
         pbLife = (ProgressBar) findViewById(R.id.pbLife);
 
         btnPause = (Button) findViewById(R.id.btnPause);
@@ -126,31 +124,33 @@ public class GameStageActivity extends Activity {
         btnPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                recycle();
                 gameState = false;
                 gamePauseDialog.show();
             }
         });
 
         threadState = true;
-        bubbleThread.start(); // 버블을 생성시켜 줄 스레드 시작
-        bumbBubbleThread.start(); // 폭탄 버블을 생성시켜 줄 스레드 시작
-        animationThread.start();
-        comboThread.start();
+        threadPoolExecutor.execute(bubbleThread);
+        threadPoolExecutor.execute(animationThread);
     }
 
-    /*
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View stage_background = (LinearLayout)inflater.inflate(R.layout.stage_background, null);
-        layout = (LinearLayout) stage_background.findViewById(R.id.layout_stage);
+    public void recycle(){
+//        for(int i=0; i<2; i++){
+//            for(int j=0; j<4; j++){
+//                m_BubbleAnimation[i][j].recycle();
+//            }
+//        }
+//        for(int i=0; i<4; i++){
+//            m_BombBubbleInAnimation[i].recycle();
+//        }
+//        for(int i=0; i<5; i++){
+//            m_BombBubbleOutAnimation[i].recycle();
+//        }
 
-        LinearLayout layout_main = (LinearLayout) stage_background.findViewById(R.id.layout_main);
-    `   */
-    // inflater로 xml로 만든 레이아웃을 가져와서 적용시킬순 없을까?
+    }
 
 
-    /*
-        GameStageActivity 에 화면(View)을 담당해 줄 GameView 클래스
-    */
 
     public void resetState(){
         arrayList.clear();
@@ -160,39 +160,69 @@ public class GameStageActivity extends Activity {
         comboState = false;
         bombBubbleState = false;
     }
+    /*
+        스마트폰에서 디코딩시 아웃오브메모리 줄이기위해서 비율 줄이는 메소드
+     */
+    private Bitmap decodeFile(int minImageSize, InputStream is){
+        Bitmap b = null;
 
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(is, null, options);
+        int scale = 1;
+        if(options.outHeight>minImageSize || options.outWidth>minImageSize){
+            scale = (int)Math.pow(  2,  (int)Math.round( Math.log( minImageSize / (double)Math.max( options.outHeight, options.outWidth ) ) / Math.log( 0.5 ) ) );
+        }
+        BitmapFactory.Options o2 = new BitmapFactory.Options();
+        o2.inSampleSize = scale;
+        b = BitmapFactory.decodeStream(is, null, o2);
+
+        return b;
+    }
+
+    /*
+        GameStageActivity 에 화면(View)을 담당해 줄 GameView 클래스
+    */
     class GameView extends View {
-        Bitmap m_BackGroundImage, m_StatusBar, m_LifeGauge, m_FeverGauge, m_GamePauseIcon; // GameStageActivity 에 배경화면 변수 선언
-        Bitmap m_BubbleAnimation[];
-        int img[] = {R.drawable.bubble0, R.drawable.bubble1, R.drawable.bubble2, R.drawable.bubble3};
+        Bitmap m_BubbleAnimation[][], m_BombBubbleInAnimation[], m_BombBubbleOutAnimation[];
+        Bitmap m_ImgBubble, m_ImgBombBubble, m_ImgFeverBubble;
 
+        int imgBubbleInOut[][] = {{R.drawable.bubble_in0, R.drawable.bubble_in1, R.drawable.bubble_in2, R.drawable.bubble_in3}, {R.drawable.bubble_out0, R.drawable.bubble_out1, R.drawable.bubble_out2, R.drawable.bubble_out3}};
+        int imgBombBubbleIn[] = {R.drawable.bomb_bubble_in0, R.drawable.bomb_bubble_in1, R.drawable.bomb_bubble_in2, R.drawable.bomb_bubble_in3};
+        int imgBombBubbleOut[] = {R.drawable.bomb_bubble_out0, R.drawable.bomb_bubble_out1, R.drawable.bomb_bubble_out2, R.drawable.bomb_bubble_out3, R.drawable.bomb_bubble_out4};
+        int animaitionCount[]; // [0] bubble_in [1] bubble_out [2] bomb_bubble_in [3] bomb_bubble_out
         Paint paint; // 페인트 변수 선언
         Paint txtPaint;
 
         public GameView(Context context) {
             super(context);
+            animaitionCount = new int[4];
+//          여기서 이미지를 디코딩을 미리 시켜줘야 어플에 부담이 안간다.
 
-//            m_BackGroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.stage_background); // 배경화면 등록
-//            m_BackGroundImage = Bitmap.createScaledBitmap(m_BackGroundImage, screenWidth, screenHeight, false); // 스마트폰 화면 사이즈에 맞게 배경화면 조정
+//            BitmapFactory.Options options = new BitmapFactory.Options();
+//            options.inSampleSize = 4;
 
-            m_BubbleAnimation = new Bitmap[4];
-            for(int i=0; i<4; i++){
-                m_BubbleAnimation[i] = BitmapFactory.decodeResource(getResources(), img[i]);
-                m_BubbleAnimation[i] = m_BubbleAnimation[i].createScaledBitmap(m_BubbleAnimation[i], screenWidth / 10*2, screenWidth / 10*2, false);
+            m_ImgBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble); // 버블 이미지 등록
+            m_ImgFeverBubble = BitmapFactory.decodeResource(getResources(), R.drawable.fever_bubble); // 피버 버블 이미지 등록
+            m_ImgBombBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bomb_bubble); // 폭탄 버블 이미지 등록
+
+            m_BubbleAnimation = new Bitmap[2][4];
+            m_BombBubbleInAnimation = new Bitmap[4];
+            m_BombBubbleOutAnimation = new Bitmap[5];
+            for(int i=0; i<2; i++){
+                for(int j=0; j<4; j++) {
+                    m_BubbleAnimation[i][j] = BitmapFactory.decodeResource(getResources(), imgBubbleInOut[i][j]);
+                    m_BubbleAnimation[i][j] = m_BubbleAnimation[i][j].createScaledBitmap(m_BubbleAnimation[i][j], bubbleRadius * 2, bubbleRadius * 2, false);
+                }
             }
-
-
-            m_LifeGauge = BitmapFactory.decodeResource(getResources(), R.drawable.life_gauge);
-            m_LifeGauge = Bitmap.createScaledBitmap(m_LifeGauge, (int) (screenWidth * 0.8), (int) (screenHeight * 0.04), false);
-
-            m_StatusBar = BitmapFactory.decodeResource(getResources(), R.drawable.status_bar);
-            m_StatusBar = Bitmap.createScaledBitmap(m_StatusBar, (int) (screenWidth * 0.9), (int) (screenHeight * 0.03), false);
-
-            m_FeverGauge = BitmapFactory.decodeResource(getResources(), R.drawable.fever_gauge);
-            m_FeverGauge = Bitmap.createScaledBitmap(m_FeverGauge, (int) (screenWidth * 0.125), (int) (screenHeight * 0.85), false);
-
-            m_GamePauseIcon = BitmapFactory.decodeResource(getResources(), R.drawable.game_pause_icon);
-            m_GamePauseIcon = Bitmap.createScaledBitmap(m_GamePauseIcon, (int) (screenWidth * 0.15), (int) (screenHeight * 0.075), false);
+            for(int i=0; i<4; i++){
+                m_BombBubbleInAnimation[i] = BitmapFactory.decodeResource(getResources(), imgBombBubbleIn[i]);
+                m_BombBubbleInAnimation[i] = m_BombBubbleInAnimation[i].createScaledBitmap(m_BombBubbleInAnimation[i], bubbleRadius * 2, bubbleRadius * 2, false);
+            }
+            for(int i=0; i<5; i++){
+                m_BombBubbleOutAnimation[i] = BitmapFactory.decodeResource(getResources(), imgBombBubbleOut[i]);
+                m_BombBubbleOutAnimation[i] = m_BombBubbleOutAnimation[i].createScaledBitmap(m_BombBubbleOutAnimation[i], bubbleRadius * 2 * 3, bubbleRadius * 2 * 3, false);
+            }
 
             combo=0;
             comboState=false;
@@ -200,10 +230,7 @@ public class GameStageActivity extends Activity {
             txtPaint = new Paint();
             txtPaint.setTextSize(50);
             bubbleThread = new BubbleThread();
-            bumbBubbleThread = new BumbBubbleThread();
             animationThread = new AnimationThread();
-            comboThread = new ComboThread();
-
         }
 
         public GameView(Context context, AttributeSet attrs){
@@ -218,98 +245,172 @@ public class GameStageActivity extends Activity {
             public BubbleThread(){
                 handler = new Handler();
             }
+
             public void run(){
                 while(threadState) {
                     if(gameState) {
-                        try {
-                            int x = (int) ((Math.random() * rectBubbleArea.width()+ rectBubbleArea.left));
-                            int y = (int) ((Math.random() * rectBubbleArea.height()+ rectBubbleArea.top));
-                            Bubble bubble = new Bubble(x, y, screenWidth / 10);
-                            if(point[0].x <  (bubble.x - bubble.r) && point[0].y < (bubble.y - bubble.r) && point[3].x >  (bubble.x + bubble.r) && point[3].y > (bubble.y + bubble.r)) {
-                                switch (combo){
-                                    case 0:case 1:case 2:case 3:case 4:
-                                        Thread.sleep(500); // 스레드가 0.5초 동안 잠든다 => 0.5초 간격으로 버블 생성
-                                        arrayList.add(bubble); break;
-                                    case 5:case 6:case 7:case 8:case 9:
-                                        Thread.sleep(400);
-                                        arrayList.add(bubble); break;
-                                    case 10:case 11:case 12:case 13:case 14:
-                                        Thread.sleep(300);
-                                        arrayList.add(bubble); break;
-                                    case 15:case 16:case 17:case 18:case 19:
-                                        Thread.sleep(200);
-                                        arrayList.add(bubble); break;
-                                    case 20:case 21:case 22:case 23:case 24:case 25:case 26:case 27:case 28:case 29:
-                                        Thread.sleep(150);
-                                        arrayList.add(bubble); break;
-                                    default:
-                                        Thread.sleep(150);
-                                        arrayList.add(bubble); break;
-                                }
-
+                        if(!bombBubbleState) {
+                            createBubble();
+                        }else{
+                            int random = (int) (Math.random()*7);
+                            if(random == 6) {
+                                createBombBubble();
+                            }else{
+                                createBubble();
                             }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                invalidate(); // 핸들러를 통해서 화면 갱신
-                                if (arrayList.size() == 50) { // 게임 실패시
-                                    resetState();
-                                    gameState = false;
-                                    gameOverDialog.show();
-                                }
-
-                                bombBubbleState = combo > 10 && arrayList.size() > 20;
-
-                            }
-                        });
-                    }
-                }
-            }
-        }
-        /*
-            폭탄 버블 객체를 생성해 줄 스레드
-        */
-        class BumbBubbleThread extends Thread {
-            Handler handler; // 핸들러 사용 이유 : 메인스레드를 제외하고는 View 를 건드릴 수 없기 때문에 핸들러를 통해서 화면 갱신 => invalidate()
-            public BumbBubbleThread(){
-                handler = new Handler();
-            }
-            public void run(){
-                while(threadState) {
-                    if(gameState) {
-                        if(bombBubbleState) {
-                            int x = (int) ((Math.random() * rectBubbleArea.width() + rectBubbleArea.left));
-                            int y = (int) ((Math.random() * rectBubbleArea.height() + rectBubbleArea.top));
-                            try {
-                                Bubble bubble = new Bubble(x, y, screenWidth / 10, true);
-                                if(point[0].x <  (bubble.x - bubble.r) && point[0].y < (bubble.y - bubble.r) && point[3].x >  (bubble.x + bubble.r) && point[3].y > (bubble.y + bubble.r)) {
-                                    Thread.sleep(2000);
-                                    arrayList.add(bubble);
-                                }
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    invalidate(); // 핸들러를 통해서 화면 갱신
-                                    if (arrayList.size() == 50) { // 게임 실패시
-                                        resetState();
-                                        gameState = false;
-                                        gameOverDialog.show();
-                                    }
-                                    bombBubbleState = combo > 10 && arrayList.size() > 20;
-                                }
-                            });
                         }
                     }
                 }
-
             }
+            void aniNewBubble(){
+                animationState[0] = true;
+                for (int i = 0; i < 4; i++) {
+                    animaitionCount[0] = i;
+                    try {
+                        switch (combo) {
+                            case 0:case 1:case 2:case 3:case 4:
+                                Thread.sleep(80); // 스레드가 0.5초 동안 잠든다 => 0.5초 간격으로 버블 생성
+                                break;
+                            case 5:case 6:case 7:case 8:case 9:
+                                Thread.sleep(60);
+                                break;
+                            case 10:case 11:case 12:case 13:case 14:
+                                Thread.sleep(40);
+                                break;
+                            case 15:case 16:case 17:case 18:case 19:
+                                Thread.sleep(20);
+                                break;
+                            default:
+                                Thread.sleep(15);
+                        }
+                    }catch(InterruptedException e){
+                        e.printStackTrace();
+                    }
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            invalidate();
+                        }
+                    });
+
+                }
+                animationState[0] = false;
+            }
+            void aniNewBombBubble(){
+                animationState[2] = true;
+                for (int i = 0; i < 4; i++) {
+                    animaitionCount[2] = i;
+                    try {
+                        switch (combo) {
+                            case 0:case 1:case 2:case 3:case 4:
+                                Thread.sleep(80); // 스레드가 0.5초 동안 잠든다 => 0.5초 간격으로 버블 생성
+                                break;
+                            case 5:case 6:case 7:case 8:case 9:
+                                Thread.sleep(60);
+                                break;
+                            case 10:case 11:case 12:case 13:case 14:
+                                Thread.sleep(40);
+                                break;
+                            case 15:case 16:case 17:case 18:case 19:
+                                Thread.sleep(20);
+                                break;
+                            default:
+                                Thread.sleep(15);
+                        }
+                    }catch(InterruptedException e){
+                        e.printStackTrace();
+                    }
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            invalidate();
+                        }
+                    });
+
+                }
+                animationState[2] = false;
+            }
+            void createBubble(){
+                try {
+                    int x = (int) ((Math.random() * rectBubbleArea.width() + rectBubbleArea.left));
+                    int y = (int) ((Math.random() * rectBubbleArea.height() + rectBubbleArea.top));
+                    Bubble bubble = new Bubble(x, y, bubbleRadius);
+                    newBubble = bubble;
+                    if (point[0].x < (bubble.x - bubble.bubbleR) && point[0].y < (bubble.y - bubble.bubbleR) && point[3].x > (bubble.x + bubble.bubbleR) && point[3].y > (bubble.y + bubble.bubbleR)) {
+                        switch (combo) {
+                            case 0:case 1:case 2:case 3:case 4:
+                                Thread.sleep(500); // 스레드가 0.5초 동안 잠든다 => 0.5초 간격으로 버블 생성
+                                aniNewBubble();
+                                arrayList.add(bubble);
+                                break;
+                            case 5:case 6:case 7:case 8:case 9:
+                                Thread.sleep(400);
+                                aniNewBubble();
+                                arrayList.add(bubble);
+                                break;
+                            case 10:case 11:case 12:case 13:case 14:
+                                Thread.sleep(300);
+                                aniNewBubble();
+                                arrayList.add(bubble);
+                                break;
+                            case 15:case 16:case 17:case 18:case 19:
+                                Thread.sleep(200);
+                                aniNewBubble();
+                                arrayList.add(bubble);
+                                break;
+                            default:
+                                Thread.sleep(150);
+                                aniNewBubble();
+                                arrayList.add(bubble);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        invalidate(); // 핸들러를 통해서 화면 갱신
+                        if (arrayList.size() == 50) { // 게임 실패시
+                            resetState();
+                            gameState = false;
+                            gameOverDialog.show();
+                        }
+
+                        bombBubbleState = combo > 10 && arrayList.size() > 20;
+
+                    }
+                });
+            }
+
+            void createBombBubble(){
+                try{
+                    int x = (int) ((Math.random() * rectBubbleArea.width() + rectBubbleArea.left));
+                    int y = (int) ((Math.random() * rectBubbleArea.height() + rectBubbleArea.top));
+                    Bubble bubble = new Bubble(x, y, bubbleRadius, true);
+                    newBombBubble = bubble;
+                    if (point[0].x < (bubble.x - bubble.bubbleR) && point[0].y < (bubble.y - bubble.bubbleR) && point[3].x > (bubble.x + bubble.bubbleR) && point[3].y > (bubble.y + bubble.bubbleR)) {
+                        Thread.sleep(500); // 스레드가 0.5초 동안 잠든다 => 0.5초 간격으로 버블 생성
+                        aniNewBombBubble();
+                        arrayList.add(bubble);
+                        }
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        invalidate(); // 핸들러를 통해서 화면 갱신
+                        if (arrayList.size() == 50) { // 게임 실패시
+                            resetState();
+                            gameState = false;
+                            gameOverDialog.show();
+                        }
+                        bombBubbleState = combo > 10 && arrayList.size() > 20;
+                    }
+                });
+            }
+
         }
 
         /*
@@ -321,7 +422,6 @@ public class GameStageActivity extends Activity {
                 handler = new Handler();
             }
             public void run(){
-
                 feverState = true;
                 try {
                     Thread.sleep(10000);
@@ -338,18 +438,13 @@ public class GameStageActivity extends Activity {
             public AnimationThread() {
                 handler = new Handler();
             }
-            public void setLocation(int x, int y, int r) {
-                this.x = x;
-                this.y = y;
-                this.r = r;
-            }
             @Override
             public void run() {
-                while(threadState) {
-                    if(gameState) {
-                        if(animationState) {
+                while (threadState) {
+                    if (gameState) {
+                        if (animationState[1]) {
                             for (int i = 0; i < 4; i++) {
-                                animaitionCount = i;
+                                animaitionCount[1] = i;
                                 try {
                                     Thread.sleep(80);
                                 } catch (InterruptedException e) {
@@ -362,10 +457,28 @@ public class GameStageActivity extends Activity {
                                     }
                                 });
                             }
-                            animationState = false;
+                            comboDraw = false;
+                            animationState[1] = false;
+                        }
+                        if (animationState[3]) {
+                            for (int i = 0; i < 5; i++) {
+                                animaitionCount[3] = i;
+                                try {
+                                    Thread.sleep(80);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        invalidate();
+                                    }
+                                });
+                            }
+                            comboDraw = false;
+                            animationState[3] = false;
                         }
                     }
-
                 }
             }
         }
@@ -384,7 +497,7 @@ public class GameStageActivity extends Activity {
             @Override
             public void run() {
                             for (int i = 0; i < 4; i++) {
-                                animaitionCount = i;
+                                animaitionCount[1]= i;
                                 try {
                                     Thread.sleep(80);
                                 } catch (InterruptedException e) {
@@ -399,41 +512,6 @@ public class GameStageActivity extends Activity {
                             }
             }
         }
-        class ComboThread extends Thread{
-            Handler handler; // 핸들러 사용 이유 : 메인스레드를 제외하고는 View 를 건드릴 수 없기 때문에 핸들러를 통해서 화면 갱신 => invalidate()
-            public ComboThread() {
-                handler = new Handler();
-            }
-            @Override
-            public void run() {
-                while(threadState) {
-                    if(gameState) {
-                        if(comboState) {
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    invalidate();
-                                }
-                            });
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            comboDraw = false;
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    invalidate();
-                                }
-                            });
-                        }
-                    }
-
-                }
-            }
-        }
-
 
         /*
             버블 클래스
@@ -441,41 +519,40 @@ public class GameStageActivity extends Activity {
         class Bubble{
             int x;
             int y;
-            int r;
+            int bubbleR, bombBubbleR;
             boolean isBombBubble;
-            Bitmap imgBubble, imgBombBubble; // 버블 객체에 이미지 변수 선언
 
             public Bubble(int x, int y, int r){ // 일반 버블 생성자
                 this.x = x;
                 this.y = y;
-                this.r = r;
+                this.bubbleR = r;
 
-                imgBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble); // 버블 이미지 등록
-                imgBubble = Bitmap.createScaledBitmap(imgBubble, r * 2, r * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
+                m_ImgBubble = Bitmap.createScaledBitmap(m_ImgBubble, r * 2, r * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
+                m_ImgFeverBubble = Bitmap.createScaledBitmap(m_ImgFeverBubble, r * 2, r * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
             }
 
             public Bubble(int x, int y, int r, boolean isBombBubble){ // 폭탄 버블 생성자
                 this.x = x;
                 this.y = y;
-                this.r = r;
+                this.bubbleR = r;
+                bombBubbleR = r*3;
                 this.isBombBubble = isBombBubble;
 
-                imgBombBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bomb_bubble); // 버블 이미지 등록
-                imgBombBubble = Bitmap.createScaledBitmap(imgBombBubble, r * 2, r * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
+                m_ImgBombBubble = Bitmap.createScaledBitmap(m_ImgBombBubble, r * 2, r * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
             }
 
             /*
                 화면 터치시 터치한 좌표가 버블 안인지 밖인지 판별해주는 함수
             */
             public boolean contains(int x, int y){
-                return Math.pow(this.x-x, 2)+Math.pow(this.y-y, 2) <= Math.pow(r, 2);
+                return Math.pow(this.x-x, 2)+Math.pow(this.y-y, 2) <= Math.pow(bubbleR, 2);
             }
 
             /*
                 폭탄 버블 터치시 주변 버블 위치를 판별해주는 함수
             */
             public boolean bombContains(int x, int y){
-                return Math.pow(this.x-x, 2)+Math.pow(this.y-y, 2) <= Math.pow(r*3, 2);
+                return Math.pow(this.x-x, 2)+Math.pow(this.y-y, 2) <= Math.pow(bombBubbleR, 2);
             }
 
 
@@ -484,48 +561,56 @@ public class GameStageActivity extends Activity {
         @Override
         protected void onDraw(Canvas canvas) {
 
-
-//            canvas.drawBitmap(m_BackGroundImage, 0, 0, paint); // GameStageActivity 배경화면 그리기
-//            canvas.drawBitmap(m_LifeGauge, point[0].x, point[0].y - (int) (point[0].y * 0.9), paint);
-//            canvas.drawBitmap(m_StatusBar, point[0].x, point[0].y - (int) (point[0].y * 0.3), paint);
-
-
-//            canvas.drawText(Integer.toString(score), point[0].x + (point[0].x * 25), point[0].y - (int) (point[0].y * 0.05), txtPaint);
-//            canvas.drawText(Integer.toString(combo), point[0].x + (point[0].x * 75), point[0].y - (int) (point[0].y * 0.05), txtPaint);
             String strScore = ""+score;
             String strCombo = ""+combo;
             tvScore.setText(strScore);
             tvCombo.setText(strCombo);
+
             if(feverState) paint.setColor(Color.RED);
             else paint.setColor(Color.BLACK);
-            canvas.drawBitmap(m_FeverGauge, point[1].x + (int) (point[1].x * 0.025), point[1].y - (int) (point[1].y * 0.05), paint);
+
+//            canvas.drawBitmap(m_FeverGauge, point[1].x + (int) (point[1].x * 0.025), point[1].y - (int) (point[1].y * 0.05), paint);
+
             paint.setStrokeWidth(5);
             canvas.drawLine(point[0].x, point[0].y, point[1].x, point[1].y, paint);
             canvas.drawLine(point[0].x, point[0].y, point[2].x, point[2].y, paint);
             canvas.drawLine(point[1].x, point[1].y, point[3].x, point[3].y, paint);
             canvas.drawLine(point[2].x, point[2].y, point[3].x, point[3].y, paint);
+
             int currentSize = arrayList.size();
             pbLife.setProgress(currentSize);
+
             if(gameState){
                 for(int i=0; i<currentSize; i++) {
                     Bubble bubble = arrayList.get(i);
                     if(bubble.isBombBubble)
-                        canvas.drawBitmap(bubble.imgBombBubble, bubble.x - bubble.r, bubble.y-bubble.r, paint);
+                        canvas.drawBitmap(m_ImgBombBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
+                    else if(feverState)
+                        canvas.drawBitmap(m_ImgFeverBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
                     else
-                        canvas.drawBitmap(bubble.imgBubble, bubble.x - bubble.r, bubble.y-bubble.r, paint);
+                        canvas.drawBitmap(m_ImgBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
                 }
             }
-            if(animationState) {
-                canvas.drawBitmap(m_BubbleAnimation[animaitionCount], animationThread.x - animationThread.r, animationThread.y - animationThread.r, paint);
+            if(animationState[0]){
+                canvas.drawBitmap(m_BubbleAnimation[0][animaitionCount[0]], newBubble.x - newBubble.bubbleR, newBubble.y - newBubble.bubbleR, paint);
+            }
+            if(animationState[1]) {
+                canvas.drawBitmap(m_BubbleAnimation[1][animaitionCount[1]], oldBubble.x - oldBubble.bubbleR, oldBubble.y - oldBubble.bubbleR, paint);
+            }
+            if(animationState[2]) {
+                canvas.drawBitmap(m_BombBubbleInAnimation[animaitionCount[2]], newBombBubble.x - newBombBubble.bubbleR, newBombBubble.y - newBombBubble.bubbleR, paint);
+            }
+            if(animationState[3]){
+                canvas.drawBitmap(m_BombBubbleOutAnimation[animaitionCount[3]], oldBubble.x - oldBubble.bombBubbleR, oldBubble.y - oldBubble.bombBubbleR, paint);
             }
             if(animationTempState){
-                canvas.drawBitmap(m_BubbleAnimation[animaitionCount], animationTempThread.x - animationThread.r, animationThread.y - animationThread.r, paint);
+                canvas.drawBitmap(m_BubbleAnimation[1][animaitionCount[1]], oldBubble.x - oldBubble.bubbleR, oldBubble.y - oldBubble.bubbleR, paint);
             }
             if(comboDraw){
                 String tmp = combo+"COMOBO!!";
                 txtPaint.setColor(Color.RED);
                 txtPaint.setTextSize(50);
-                canvas.drawText(tmp, oldBubble.x + oldBubble.r/2, oldBubble.y - oldBubble.r/2, txtPaint);
+                canvas.drawText(tmp, oldBubble.x + oldBubble.bubbleR /2, oldBubble.y - oldBubble.bubbleR /2, txtPaint);
             }
 
         }
@@ -540,44 +625,28 @@ public class GameStageActivity extends Activity {
                     Bubble bubble = arrayList.get(i);
 
                     if (bubble.contains(px, py)) {
-                        animationThread.setLocation(bubble.x, bubble.y, bubble.r);
                         oldBubble = bubble;
                         arrayList.remove(bubble);
                         score += 10;
                         ++combo;
                         comboState = true;
                         comboDraw = true;
-                        animationState = true;
 
-                        if(bubble.isBombBubble){
+                        if(bubble.isBombBubble) {
+                            animationState[3] = true;
                             vibrator.vibrate(500);
                             animationTempState = true;
-                            for(int j=arrayList.size() - 1; 0 <= j; j--){
+                            for (int j = arrayList.size() - 1; 0 <= j; j--) {
                                 Bubble tmpBubble = arrayList.get(j);
-                                if(bubble.bombContains(tmpBubble.x, tmpBubble.y)) {
+                                if (bubble.bombContains(tmpBubble.x, tmpBubble.y)) {
                                     arrayList.remove(j);
-                                    score+=10;
+                                    score += 10;
                                     ++combo;
-
-//                                    animationTempThread = new AnimationTempThread();
-//                                    animationTempThread.setLocation(tmpBubble.x, tmpBubble.y, tmpBubble.r);
-//                                    animationTempThread.start();
-//                                    try {
-//                                        animationTempThread.join();
-//                                    } catch (InterruptedException e) {
-//                                        e.printStackTrace();
-//                                    }
-//                                    threadArrayList.add(animationTempThread);
                                 }
+                                animationTempState = false;
                             }
-//                            for (int k=0; k<threadArrayList.size(); k++){
-//                                try {
-//                                    threadArrayList.get(k).join();
-//                                } catch (InterruptedException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-                            animationTempState = false;
+                        }else{
+                            animationState[1] = true;
                         }
                         break;
                     }
@@ -589,49 +658,35 @@ public class GameStageActivity extends Activity {
                         Bubble bubble = arrayList.get(i);
 
                         if (bubble.contains(px, py)) {
-                            animationThread.setLocation(bubble.x, bubble.y, bubble.r);
                             oldBubble = bubble;
                             arrayList.remove(bubble);
                             score += 10;
                             ++combo;
                             comboState = true;
                             comboDraw = true;
-                            animationState = true;
-                            if(combo >= 30){
-                                Toast.makeText(getApplicationContext(), "Fever Time!!", Toast.LENGTH_SHORT).show();
-                                new FeverThread().start();
-                            }
-                            if(bubble.isBombBubble){
+                            if(bubble.isBombBubble) {
+                                animationState[3] = true;
                                 vibrator.vibrate(500);
                                 animationTempState = true;
-                                for(int j=arrayList.size() - 1; 0 <= j; j--){
+                                for (int j = arrayList.size() - 1; 0 <= j; j--) {
                                     Bubble tmpBubble = arrayList.get(j);
-                                    if(bubble.bombContains(tmpBubble.x, tmpBubble.y)) {
+                                    if (bubble.bombContains(tmpBubble.x, tmpBubble.y)) {
                                         arrayList.remove(j);
-                                        score+=10;
+                                        score += 10;
                                         ++combo;
-//                                        animationTempThread = new AnimationTempThread();
-//                                        animationTempThread.setLocation(tmpBubble.x, tmpBubble.y, tmpBubble.r);
-//                                        animationTempThread.start();
-//                                        try {
-//                                            animationTempThread.join();
-//                                        } catch (InterruptedException e) {
-//                                            e.printStackTrace();
-//                                        }
-//                                        threadArrayList.add(animationTempThread);
                                     }
+                                    animationTempState = false;
                                 }
-//                                for (int k=0; k<threadArrayList.size(); k++){
-//                                    try {
-//                                        threadArrayList.get(k).join();
-//                                    } catch (InterruptedException e) {
-//                                        e.printStackTrace();
-//                                    }
-//                                }
-                                animationTempState = false;
+                            }else{
+                                animationState[1] = true;
                             }
-                            break;
 
+                            if(combo >= 30){
+                                Toast.makeText(getApplicationContext(), "Fever Time!!", Toast.LENGTH_SHORT).show();
+                                threadPoolExecutor.execute(new FeverThread());
+                            }
+
+                            break;
                         } else {
                             comboState = false;
                         }
@@ -658,5 +713,10 @@ public class GameStageActivity extends Activity {
         gamePauseDialog.show();
     }
 
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }
 

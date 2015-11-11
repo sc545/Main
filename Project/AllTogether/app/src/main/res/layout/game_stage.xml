@@ -25,10 +25,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/btnPause"
-            android:text="Pause"
             android:layout_gravity="right"
             android:layout_weight="4"
-            android:layout_marginRight="3dp"/>
+            android:layout_marginRight="3dp"
+            android:background="@drawable/game_pause_icon_selector"/>
 
     </LinearLayout>
     <LinearLayout

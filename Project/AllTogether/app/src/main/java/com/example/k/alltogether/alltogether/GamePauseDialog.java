@@ -49,6 +49,8 @@ public class GamePauseDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 gameStageActivity.threadState=false;
+                Intent i = new Intent(gameStageActivity.getApplicationContext(), MainActivity.class);
+                gameStageActivity.startActivity(i);
                 gameStageActivity.finish();
                 dismiss();
             }
