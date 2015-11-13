@@ -2,21 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="350dp"
-    android:layout_height="450dp"
+    android:layout_height="400dp"
     android:background="@drawable/game_pause">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
-        <ImageButton
-            android:id="@+id/btnGamePauseRePlay"
-            android:layout_width="250dp"
-            android:layout_height="110dp"
-            android:background="@drawable/game_pause_replay_selector"
-            android:layout_marginLeft="40dp"
-            android:layout_gravity="center"/>
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,6 +14,19 @@
             android:layout_width="250dp"
             android:layout_height="110dp"
             android:background="@drawable/game_pause_again_selector"
+            android:layout_marginLeft="40dp"
+            android:layout_gravity="center"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+        <ImageButton
+            android:id="@+id/btnGamePauseNewGame"
+            android:layout_width="250dp"
+            android:layout_height="110dp"
+            android:background="@drawable/game_pause_new_game_selector"
             android:layout_marginLeft="40dp"
             android:layout_gravity="center"/>
     </LinearLayout>

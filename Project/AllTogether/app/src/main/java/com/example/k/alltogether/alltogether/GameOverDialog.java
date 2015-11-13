@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -31,14 +30,14 @@ public class GameOverDialog extends Dialog {
             public void onClick(View v) {
                 gameStageActivity.resetState();
                 dismiss();
-                gameStageActivity.gameState=true;
+                gameStageActivity.m_bGameState =true;
             }
         });
 
         btnMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gameStageActivity.threadState=false;
+                gameStageActivity.m_bThreadState =false;
                 Intent i = new Intent(gameStageActivity.getApplicationContext(), MainActivity.class);
                 gameStageActivity.startActivity(i);
                 gameStageActivity.finish();

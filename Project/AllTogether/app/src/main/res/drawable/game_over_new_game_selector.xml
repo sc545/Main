@@ -5,12 +5,12 @@
     <item
         android:state_focused="false"
         android:state_pressed="false"
-        android:drawable="@drawable/game_over_replay0" />
+        android:drawable="@drawable/game_over_new_game0" />
 
     <!-- 클릭했을 때 -->
     <item
         android:state_focused="false"
         android:state_pressed="true"
-        android:drawable="@drawable/game_over_replay1" />
+        android:drawable="@drawable/game_over_new_game1" />
 
 </selector>
