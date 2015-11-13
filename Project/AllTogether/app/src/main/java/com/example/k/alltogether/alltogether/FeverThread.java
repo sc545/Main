@@ -19,6 +19,7 @@ public class FeverThread extends Thread {
         }catch (InterruptedException e) {
             e.printStackTrace();
         }
+        gameStageActivity.m_nFeverCombo = 0;
         gameStageActivity.m_bFeverState = false;
     }
 }

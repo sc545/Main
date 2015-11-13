@@ -79,8 +79,33 @@ public class BubbleThread extends Thread {
                         aniNewBubble();
                         arrayList.add(bubble);
                         break;
-                    default:
+                    case 20:case 21:case 22:case 23:case 24:
                         Thread.sleep(150);
+                        aniNewBubble();
+                        arrayList.add(bubble);
+                        break;
+                    case 25:case 26:case 27:case 28:case 29:
+                        Thread.sleep(140);
+                        aniNewBubble();
+                        arrayList.add(bubble);
+                        break;
+                    case 30:case 31:case 32:case 33:case 34:
+                        Thread.sleep(130);
+                        aniNewBubble();
+                        arrayList.add(bubble);
+                        break;
+                    case 35:case 36:case 37:case 38:case 39:
+                        Thread.sleep(120);
+                        aniNewBubble();
+                        arrayList.add(bubble);
+                        break;
+                    case 40:case 41:case 42:case 43:case 44:
+                        Thread.sleep(110);
+                        aniNewBubble();
+                        arrayList.add(bubble);
+                        break;
+                    default:
+                        Thread.sleep(100);
                         aniNewBubble();
                         arrayList.add(bubble);
                 }
@@ -132,8 +157,33 @@ public class BubbleThread extends Thread {
                         aniNewBombBubble();
                         arrayList.add(bubble);
                         break;
-                    default:
+                    case 20:case 21:case 22:case 23:case 24:
                         Thread.sleep(150);
+                        aniNewBombBubble();
+                        arrayList.add(bubble);
+                        break;
+                    case 25:case 26:case 27:case 28:case 29:
+                        Thread.sleep(140);
+                        aniNewBombBubble();
+                        arrayList.add(bubble);
+                        break;
+                    case 30:case 31:case 32:case 33:case 34:
+                        Thread.sleep(130);
+                        aniNewBombBubble();
+                        arrayList.add(bubble);
+                        break;
+                    case 35:case 36:case 37:case 38:case 39:
+                        Thread.sleep(120);
+                        aniNewBombBubble();
+                        arrayList.add(bubble);
+                        break;
+                    case 40:case 41:case 42:case 43:case 44:
+                        Thread.sleep(110);
+                        aniNewBombBubble();
+                        arrayList.add(bubble);
+                        break;
+                    default:
+                        Thread.sleep(100);
                         aniNewBombBubble();
                         arrayList.add(bubble);
                 }

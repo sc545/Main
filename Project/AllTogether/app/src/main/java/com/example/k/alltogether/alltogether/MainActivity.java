@@ -15,11 +15,16 @@ import com.example.k.alltogether.R;
 
 public class MainActivity extends Activity {
     ImageButton btnHowTo, btnSetting, btnStart;
-
+    static Music music=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+        if(music == null)
+            music = new Music(MainActivity.this);
+        if(!music.isPlaying())
+            music.start();
 
         btnHowTo = (ImageButton) findViewById(R.id.btnHowTo);
         btnSetting = (ImageButton) findViewById(R.id.btnSetting);
@@ -52,6 +57,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         System.gc();
+        music.pause();
         super.onDestroy();
     }
 }

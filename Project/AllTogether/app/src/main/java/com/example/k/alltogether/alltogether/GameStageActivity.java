@@ -39,6 +39,7 @@ public class GameStageActivity extends Activity {
     boolean m_bThreadState; // 스레드 상태를 담을 변수
     boolean m_bFeverState; // 피버 상태를 담을 변수
     boolean m_bComboState; // 게임 중 콤보상태를 담을 변수 선언
+    boolean m_bComboMissState;
     boolean m_bBombBubbleState; // 폭탄 버블 생성 여부를 담을 변수 선언
     boolean m_bAnimationState[]; // 애니메이션 상태를 담을 변수 선언
     boolean m_bAnimationTempState;
@@ -46,15 +47,16 @@ public class GameStageActivity extends Activity {
 
     int m_nScreenWidth, m_nScreenHeight; // 스마트폰 화면 사이즈를 담을 변수
     int m_nBubbleRadius; // 버블 반지름
-    int m_nCombo; // 게임 중 몇 콤보 수를 담을 변수 선언
     int m_nScore; // 게임 중 몇 점수를 담을 변수 선언
+    int m_nCombo; // 게임 중 몇 콤보 수를 담을 변수 선언
+    int m_nFeverCombo; // 피버 콤보 변수
     int m_nBubbleMaxSize; // 버블 최대 개수
     int m_iAnimationCount[]; // [0] bubble_in [1] bubble_out [2] bomb_bubble_in [3] bomb_bubble_out
 
     /*
         버블 관련 Bitmap 변수 선언
      */
-    Bitmap m_btmpImgBubble, m_btmpImgBombBubble, m_btmpImgFeverBubble;
+    Bitmap m_btmpImgBubble, m_btmpImgBombBubble, m_btmpImgFeverBubble, m_btmpComboMiss;
     Bitmap m_btmpBubbleAnimation[][], m_btmpBombBubbleInAnimation[], m_btmpBombBubbleOutAnimation[];
     Drawable m_drawableFeverGauge[], m_drawableLifeGauge[];
 
@@ -83,6 +85,9 @@ public class GameStageActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+//        MainActivity.music.start();
+
         /*
             멤버 변수 초기화
          */
@@ -164,6 +169,7 @@ public class GameStageActivity extends Activity {
         m_arraylistBubble.clear();
         m_nScore =0;
         m_nCombo =0;
+        m_nFeverCombo = 0;
         m_bFeverState = false;
         m_bComboState = false;
         m_bBombBubbleState = false;
@@ -221,10 +227,11 @@ public class GameStageActivity extends Activity {
             m_btmpImgBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble); // 버블 이미지 등록
             m_btmpImgFeverBubble = BitmapFactory.decodeResource(getResources(), R.drawable.fever_bubble); // 피버 버블 이미지 등록
             m_btmpImgBombBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bomb_bubble); // 폭탄 버블 이미지 등록
+            m_btmpComboMiss = BitmapFactory.decodeResource(getResources(), R.drawable.combo_miss);
             m_btmpImgBubble = Bitmap.createScaledBitmap(m_btmpImgBubble, m_nBubbleRadius * 2, m_nBubbleRadius * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
             m_btmpImgFeverBubble = Bitmap.createScaledBitmap(m_btmpImgFeverBubble, m_nBubbleRadius * 2, m_nBubbleRadius * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
             m_btmpImgBombBubble = Bitmap.createScaledBitmap(m_btmpImgBombBubble, m_nBubbleRadius * 2, m_nBubbleRadius * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
-
+            m_btmpComboMiss = Bitmap.createScaledBitmap(m_btmpComboMiss, m_nScreenWidth, m_nScreenHeight, false); // 버블 반지름에 맞게 버블 이미지 조정
             /*
                 버블 애니메이션 이미지 가져오고 크기 재조정
              */
@@ -320,10 +327,8 @@ public class GameStageActivity extends Activity {
             else
                 ivLifeGauge.setImageDrawable(m_drawableLifeGauge[currentSize/2]);
 
-            if(m_nCombo<=30)
-                ivFerverGauge.setImageDrawable(m_drawableFeverGauge[m_nCombo]);
-            else
-                ivFerverGauge.setImageDrawable(m_drawableFeverGauge[30]);
+            if(m_nFeverCombo<=30)
+                ivFerverGauge.setImageDrawable(m_drawableFeverGauge[m_nFeverCombo]);
 
             /*
                 현재 m_arraylistBubble 에 존재하는 버블 그리기
@@ -370,6 +375,10 @@ public class GameStageActivity extends Activity {
                 canvas.drawText(tmp, m_OldBubble.x + m_OldBubble.bubbleR /2, m_OldBubble.y - m_OldBubble.bubbleR /2, txtPaint);
             }
 
+            if(m_bComboMissState){
+                canvas.drawBitmap(m_btmpComboMiss, 0, 0, paint);
+            }
+
         }
 
         @Override
@@ -384,8 +393,7 @@ public class GameStageActivity extends Activity {
                     if (bubble.contains(px, py)) {
                         m_OldBubble = bubble;
                         m_arraylistBubble.remove(bubble);
-                        m_nScore += 10;
-                        ++m_nCombo;
+                        m_nScore += 10 * ++m_nCombo;
                         m_bComboState = true;
                         m_bComboDraw = true;
 
@@ -397,8 +405,7 @@ public class GameStageActivity extends Activity {
                                 Bubble tmpBubble = m_arraylistBubble.get(j);
                                 if (bubble.bombContains(tmpBubble.x, tmpBubble.y)) {
                                     m_arraylistBubble.remove(j);
-                                    m_nScore += 10;
-                                    ++m_nCombo;
+                                    m_nScore += 10 * ++m_nCombo;
                                 }
                                 m_bAnimationTempState = false;
                             }
@@ -419,6 +426,7 @@ public class GameStageActivity extends Activity {
                             m_arraylistBubble.remove(bubble);
                             m_nScore += 10;
                             ++m_nCombo;
+                            ++m_nFeverCombo;
                             m_bComboState = true;
                             m_bComboDraw = true;
                             if(bubble.isBombBubble) {
@@ -438,7 +446,7 @@ public class GameStageActivity extends Activity {
                                 m_bAnimationState[1] = true;
                             }
 
-                            if(m_nCombo >= 30){
+                            if(m_nFeverCombo >= 30){
                                 Toast.makeText(getApplicationContext(), "Fever Time!!", Toast.LENGTH_SHORT).show();
                                 m_ThreadPoolExecutor.execute(new FeverThread(gameStageActivity));
                             }
@@ -448,7 +456,11 @@ public class GameStageActivity extends Activity {
                             m_bComboState = false;
                         }
                     }
-                    if (!m_bComboState) m_nCombo = 0;
+                    if (!m_bComboState){
+                        m_nCombo = 0;
+                        m_nFeverCombo = 0;
+                        m_ThreadPoolExecutor.execute(new ComboMissThread(gameStageActivity));
+                    }
                     invalidate();
                 }
             }
