@@ -10,28 +10,33 @@ public class Bubble {
     int y;
     int bubbleR, bombBubbleR;
     boolean isBombBubble;
-    Bitmap imgBubble, imgFeverBubble, imgBombBubble;
+    Bitmap m_btmpImgBubble, m_btmpImgFeverBubble, m_btmpImgBombBubble;
+    Bitmap m_btmpBubbleAnimation[][], m_btmpBombBubbleInAnimation[], m_btmpBombBubbleOutAnimation[];
 
-    public Bubble(int x, int y, int r, Bitmap m_ImgBubble, Bitmap m_ImgFeverBubble){ // 일반 버블 생성자
+    public Bubble(int x, int y, int r, GameStageActivity gameStageActivity){ // 일반 버블 생성자
         this.x = x;
         this.y = y;
         this.bubbleR = r;
-
-        imgBubble = m_ImgBubble;
-        imgBubble = Bitmap.createScaledBitmap(imgBubble, r * 2, r * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
-        imgFeverBubble = m_ImgFeverBubble;
-        imgFeverBubble = Bitmap.createScaledBitmap(imgFeverBubble, r * 2, r * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
+        m_btmpImgBubble = gameStageActivity.m_btmpImgBubble;
+        m_btmpImgFeverBubble = gameStageActivity.m_btmpImgFeverBubble;
+        m_btmpImgBombBubble = gameStageActivity.m_btmpImgBombBubble;
+        m_btmpBubbleAnimation = gameStageActivity.m_btmpBubbleAnimation;
+        m_btmpBombBubbleInAnimation = gameStageActivity.m_btmpBombBubbleInAnimation;
+        m_btmpBombBubbleOutAnimation = gameStageActivity.m_btmpBombBubbleOutAnimation;
     }
 
-    public Bubble(int x, int y, int r, Bitmap m_ImgBombBubble){ // 폭탄 버블 생성자
+    public Bubble(int x, int y, int r, GameStageActivity gameStageActivity, boolean isBombBubble){ // 폭탄 버블 생성자
         this.x = x;
         this.y = y;
         this.bubbleR = r;
         bombBubbleR = r*3;
-        isBombBubble = true;
-
-        imgBombBubble = m_ImgBombBubble;
-        imgBombBubble = Bitmap.createScaledBitmap(imgBombBubble, r * 2, r * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
+        this.isBombBubble = isBombBubble;
+        m_btmpImgBubble = gameStageActivity.m_btmpImgBubble;
+        m_btmpImgFeverBubble = gameStageActivity.m_btmpImgFeverBubble;
+        m_btmpImgBombBubble = gameStageActivity.m_btmpImgBombBubble;
+        m_btmpBubbleAnimation = gameStageActivity.m_btmpBubbleAnimation;
+        m_btmpBombBubbleInAnimation = gameStageActivity.m_btmpBombBubbleInAnimation;
+        m_btmpBombBubbleOutAnimation = gameStageActivity.m_btmpBombBubbleOutAnimation;
     }
 
     /*

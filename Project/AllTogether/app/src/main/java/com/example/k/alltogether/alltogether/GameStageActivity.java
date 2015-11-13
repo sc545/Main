@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.AttributeSet;
@@ -17,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -46,6 +48,7 @@ public class GameStageActivity extends Activity {
     int m_nBubbleRadius; // 버블 반지름
     int m_nCombo; // 게임 중 몇 콤보 수를 담을 변수 선언
     int m_nScore; // 게임 중 몇 점수를 담을 변수 선언
+    int m_nBubbleMaxSize; // 버블 최대 개수
     int m_iAnimationCount[]; // [0] bubble_in [1] bubble_out [2] bomb_bubble_in [3] bomb_bubble_out
 
     /*
@@ -53,16 +56,11 @@ public class GameStageActivity extends Activity {
      */
     Bitmap m_btmpImgBubble, m_btmpImgBombBubble, m_btmpImgFeverBubble;
     Bitmap m_btmpBubbleAnimation[][], m_btmpBombBubbleInAnimation[], m_btmpBombBubbleOutAnimation[];
+    Drawable m_drawableFeverGauge[], m_drawableLifeGauge[];
 
 
     ArrayList<Bubble> m_arraylistBubble; // 게임 속에서 생성되는 버블 객체를 가지고 있을 ArrayList
-    Bubble m_NewBubble, m_OldBubble, m_NewBombBubble; // 추가, 삭제 될 버블을 가지고 있을 변수
-
-    /*
-        다이얼로그 변수
-     */
-    GameOverDialog m_dlgGameOverDialog;
-    GamePauseDialog m_dlgGamePauseDialog;
+    Bubble m_NewBubble, m_OldBubble; // 추가, 삭제 될 버블을 가지고 있을 변수
 
     Rect m_rectBubbleArea; // 버블 생성 영역
 
@@ -71,7 +69,14 @@ public class GameStageActivity extends Activity {
     ProgressBar pbLife; // 체력바
     Button btnPause; // 일지정지 버튼
     TextView tvScore, tvCombo; // 점수, 콤보 TextView
+    ImageView ivFerverGauge, ivLifeGauge;
     LinearLayout layoutGameArea;
+
+    /*
+        다이얼로그 변수
+     */
+    GameOverDialog m_dlgGameOverDialog;
+    GamePauseDialog m_dlgGamePauseDialog;
 
     ThreadPoolExecutor m_ThreadPoolExecutor;
 
@@ -90,12 +95,10 @@ public class GameStageActivity extends Activity {
         m_nScreenWidth = getApplicationContext().getResources().getDisplayMetrics().widthPixels; // 스마트폰 화면 사이즈 가져오는 함수
         m_nScreenHeight = getApplicationContext().getResources().getDisplayMetrics().heightPixels;
         m_nBubbleRadius = m_nScreenWidth /10;
+        m_nBubbleMaxSize = 40;
         m_iAnimationCount = new int[4];
 
         m_arraylistBubble = new ArrayList<Bubble>(); // m_arraylistBubble 객체 생성
-
-        m_dlgGameOverDialog = new GameOverDialog(this, gameStageActivity);
-        m_dlgGamePauseDialog = new GamePauseDialog(this, gameStageActivity);
 
         m_rectBubbleArea = new Rect();
 
@@ -107,6 +110,9 @@ public class GameStageActivity extends Activity {
         m_rectBubbleArea.set(startX, startY, endX, endY);
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        m_dlgGameOverDialog = new GameOverDialog(this, gameStageActivity);
+        m_dlgGamePauseDialog = new GamePauseDialog(this, gameStageActivity);
 
         /*
             첫 번째 뷰
@@ -127,12 +133,15 @@ public class GameStageActivity extends Activity {
         layout.setFocusable(true);
         addContentView(layout, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        pbLife = (ProgressBar) findViewById(R.id.pbLife);
+//        pbLife = (ProgressBar) findViewById(R.id.pbLife);
 
         btnPause = (Button) findViewById(R.id.btnPause);
 
         tvScore = (TextView) findViewById(R.id.tvScore);
         tvCombo = (TextView) findViewById(R.id.tvCombo);
+
+        ivFerverGauge = (ImageView) findViewById(R.id.ivFeverGauge);
+        ivLifeGauge = (ImageView) findViewById(R.id.ivLifeGauge);
 
         btnPause.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -199,13 +208,22 @@ public class GameStageActivity extends Activity {
             int imgBubbleInOut[][] = {{R.drawable.bubble_in0, R.drawable.bubble_in1, R.drawable.bubble_in2, R.drawable.bubble_in3}, {R.drawable.bubble_out0, R.drawable.bubble_out1, R.drawable.bubble_out2, R.drawable.bubble_out3}};
             int imgBombBubbleIn[] = {R.drawable.bomb_bubble_in0, R.drawable.bomb_bubble_in1, R.drawable.bomb_bubble_in2, R.drawable.bomb_bubble_in3};
             int imgBombBubbleOut[] = {R.drawable.bomb_bubble_out0, R.drawable.bomb_bubble_out1, R.drawable.bomb_bubble_out2, R.drawable.bomb_bubble_out3, R.drawable.bomb_bubble_out4};
-
+            int imgFeverGauge[] = {R.drawable.fever_gauge0, R.drawable.fever_gauge1, R.drawable.fever_gauge2, R.drawable.fever_gauge3, R.drawable.fever_gauge4, R.drawable.fever_gauge5, R.drawable.fever_gauge6, R.drawable.fever_gauge7, R.drawable.fever_gauge8, R.drawable.fever_gauge9,
+                    R.drawable.fever_gauge10, R.drawable.fever_gauge11, R.drawable.fever_gauge12, R.drawable.fever_gauge13, R.drawable.fever_gauge14, R.drawable.fever_gauge15, R.drawable.fever_gauge16, R.drawable.fever_gauge17, R.drawable.fever_gauge18, R.drawable.fever_gauge19,
+                    R.drawable.fever_gauge20, R.drawable.fever_gauge21, R.drawable.fever_gauge22, R.drawable.fever_gauge23, R.drawable.fever_gauge24, R.drawable.fever_gauge25, R.drawable.fever_gauge26, R.drawable.fever_gauge27, R.drawable.fever_gauge28, R.drawable.fever_gauge29, R.drawable.fever_gauge30};
+            int imgLifeGauge[] = {R.drawable.life_gauge0, R.drawable.life_gauge1, R.drawable.life_gauge2, R.drawable.life_gauge3, R.drawable.life_gauge4,
+                    R.drawable.life_gauge5, R.drawable.life_gauge6, R.drawable.life_gauge7, R.drawable.life_gauge8, R.drawable.life_gauge9,
+                    R.drawable.life_gauge10, R.drawable.life_gauge11, R.drawable.life_gauge12, R.drawable.life_gauge13, R.drawable.life_gauge14,
+                    R.drawable.life_gauge15, R.drawable.life_gauge16, R.drawable.life_gauge17, R.drawable.life_gauge18, R.drawable.life_gauge19, R.drawable.life_gauge20};
             /*
-                버블, 피버버블, 폭탄버블 이미지 가져오기
+                버블, 피버버블, 폭탄버블 이미지 가져오고 크기 재조정
              */
             m_btmpImgBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble); // 버블 이미지 등록
             m_btmpImgFeverBubble = BitmapFactory.decodeResource(getResources(), R.drawable.fever_bubble); // 피버 버블 이미지 등록
             m_btmpImgBombBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bomb_bubble); // 폭탄 버블 이미지 등록
+            m_btmpImgBubble = Bitmap.createScaledBitmap(m_btmpImgBubble, m_nBubbleRadius * 2, m_nBubbleRadius * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
+            m_btmpImgFeverBubble = Bitmap.createScaledBitmap(m_btmpImgFeverBubble, m_nBubbleRadius * 2, m_nBubbleRadius * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
+            m_btmpImgBombBubble = Bitmap.createScaledBitmap(m_btmpImgBombBubble, m_nBubbleRadius * 2, m_nBubbleRadius * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
 
             /*
                 버블 애니메이션 이미지 가져오고 크기 재조정
@@ -226,6 +244,15 @@ public class GameStageActivity extends Activity {
             for(int i=0; i<5; i++){
                 m_btmpBombBubbleOutAnimation[i] = BitmapFactory.decodeResource(getResources(), imgBombBubbleOut[i]);
                 m_btmpBombBubbleOutAnimation[i] = m_btmpBombBubbleOutAnimation[i].createScaledBitmap(m_btmpBombBubbleOutAnimation[i], m_nBubbleRadius * 2 * 3, m_nBubbleRadius * 2 * 3, false);
+            }
+
+            m_drawableFeverGauge = new Drawable[31];
+            m_drawableLifeGauge = new Drawable[21];
+            for(int i=0; i<31; i++){
+                m_drawableFeverGauge[i] = getResources().getDrawable(imgFeverGauge[i]);
+            }
+            for(int i=0; i<21; i++){
+                m_drawableLifeGauge[i] = getResources().getDrawable(imgLifeGauge[i]);
             }
 
             paint = new Paint();
@@ -283,7 +310,21 @@ public class GameStageActivity extends Activity {
                 현재 버블 개수 만큼 프로그레스바 갱신
              */
             int currentSize = m_arraylistBubble.size();
-            pbLife.setProgress(currentSize);
+//            pbLife.setProgress(currentSize);
+
+            /*
+                체력, 피버 게이지 갱신
+             */
+            if(currentSize == 1)
+                ivLifeGauge.setImageDrawable(m_drawableLifeGauge[1]);
+            else
+                ivLifeGauge.setImageDrawable(m_drawableLifeGauge[currentSize/2]);
+
+            if(m_nCombo<=30)
+                ivFerverGauge.setImageDrawable(m_drawableFeverGauge[m_nCombo]);
+            else
+                ivFerverGauge.setImageDrawable(m_drawableFeverGauge[30]);
+
             /*
                 현재 m_arraylistBubble 에 존재하는 버블 그리기
              */
@@ -291,11 +332,11 @@ public class GameStageActivity extends Activity {
                 for(int i=0; i<currentSize; i++) {
                     Bubble bubble = m_arraylistBubble.get(i);
                     if(bubble.isBombBubble)
-                        canvas.drawBitmap(bubble.imgBombBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
+                        canvas.drawBitmap(bubble.m_btmpImgBombBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
                     else if(m_bFeverState)
-                        canvas.drawBitmap(bubble.imgFeverBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
+                        canvas.drawBitmap(bubble.m_btmpImgFeverBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
                     else
-                        canvas.drawBitmap(bubble.imgBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
+                        canvas.drawBitmap(bubble.m_btmpImgBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
                 }
             }
             /*
@@ -305,16 +346,16 @@ public class GameStageActivity extends Activity {
                 m_bAnimationState[3] - 폭탄 버블이 터질 경우 애니메이션
              */
             if(m_bAnimationState[0]){
-                canvas.drawBitmap(m_btmpBubbleAnimation[0][m_iAnimationCount[0]], m_NewBubble.x - m_NewBubble.bubbleR, m_NewBubble.y - m_NewBubble.bubbleR, paint);
+                canvas.drawBitmap(m_NewBubble.m_btmpBubbleAnimation[0][m_iAnimationCount[0]], m_NewBubble.x - m_NewBubble.bubbleR, m_NewBubble.y - m_NewBubble.bubbleR, paint);
             }
             if(m_bAnimationState[1]) {
-                canvas.drawBitmap(m_btmpBubbleAnimation[1][m_iAnimationCount[1]], m_OldBubble.x - m_OldBubble.bubbleR, m_OldBubble.y - m_OldBubble.bubbleR, paint);
+                canvas.drawBitmap(m_OldBubble.m_btmpBubbleAnimation[1][m_iAnimationCount[1]], m_OldBubble.x - m_OldBubble.bubbleR, m_OldBubble.y - m_OldBubble.bubbleR, paint);
             }
             if(m_bAnimationState[2]) {
-                canvas.drawBitmap(m_btmpBombBubbleInAnimation[m_iAnimationCount[2]], m_NewBombBubble.x - m_NewBombBubble.bubbleR, m_NewBombBubble.y - m_NewBombBubble.bubbleR, paint);
+                canvas.drawBitmap(m_NewBubble.m_btmpBombBubbleInAnimation[m_iAnimationCount[2]], m_NewBubble.x - m_NewBubble.bubbleR, m_NewBubble.y - m_NewBubble.bubbleR, paint);
             }
             if(m_bAnimationState[3]){
-                canvas.drawBitmap(m_btmpBombBubbleOutAnimation[m_iAnimationCount[3]], m_OldBubble.x - m_OldBubble.bombBubbleR, m_OldBubble.y - m_OldBubble.bombBubbleR, paint);
+                canvas.drawBitmap(m_OldBubble.m_btmpBombBubbleOutAnimation[m_iAnimationCount[3]], m_OldBubble.x - m_OldBubble.bombBubbleR, m_OldBubble.y - m_OldBubble.bombBubbleR, paint);
             }
             if(m_bAnimationTempState){
                 canvas.drawBitmap(m_btmpBubbleAnimation[1][m_iAnimationCount[1]], m_OldBubble.x - m_OldBubble.bubbleR, m_OldBubble.y - m_OldBubble.bubbleR, paint);
