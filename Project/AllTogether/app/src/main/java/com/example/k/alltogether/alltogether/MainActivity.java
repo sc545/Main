@@ -1,8 +1,10 @@
 package com.example.k.alltogether.alltogether;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -14,12 +16,16 @@ import com.example.k.alltogether.R;
  */
 
 public class MainActivity extends Activity {
+    int m_nScreenWidth, m_nScreenHeight; // 스마트폰 화면 사이즈를 담을 변수
     ImageButton btnHowTo, btnSetting, btnStart;
     static Music music=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+        m_nScreenWidth = getApplicationContext().getResources().getDisplayMetrics().widthPixels; // 스마트폰 화면 사이즈 가져오는 함수
+        m_nScreenHeight = getApplicationContext().getResources().getDisplayMetrics().heightPixels;
 
         if(music == null)
             music = new Music(MainActivity.this);
@@ -52,6 +58,12 @@ public class MainActivity extends Activity {
                 finish();
             }
         });
+    }
+
+    private void showHotTo(){
+
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.game_stage1, null);
     }
 
     @Override
