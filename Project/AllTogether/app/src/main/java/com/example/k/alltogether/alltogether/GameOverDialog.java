@@ -6,23 +6,15 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.k.alltogether.R;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.net.Socket;
 
 
 /**
@@ -34,6 +26,7 @@ public class GameOverDialog extends Dialog {
     EditText etName;
     TextView tvScore;
     Button btnSubmit;
+    Music musicGameOver;
 
 
 
@@ -57,6 +50,7 @@ public class GameOverDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 gameStageActivity.resetState();
+                musicGameOver.stop();
                 dismiss();
                 gameStageActivity.m_bGameState = true;
             }
@@ -69,6 +63,7 @@ public class GameOverDialog extends Dialog {
                 Intent i = new Intent(gameStageActivity.getApplicationContext(), MainActivity.class);
                 gameStageActivity.startActivity(i);
                 gameStageActivity.finish();
+                musicGameOver.stop();
                 dismiss();
             }
         });
@@ -76,15 +71,28 @@ public class GameOverDialog extends Dialog {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RankThread rankThread = new RankThread(gameStageActivity.getApplicationContext(), etName.getText().toString(), gameStageActivity.m_nScore);
-                rankThread.start();
+                RankWriteThread rankWriteThread = new RankWriteThread(gameStageActivity.getApplicationContext(), etName.getText().toString(), gameStageActivity.m_nScore);
+                rankWriteThread.start();
             }
         });
+    }
+
+    public void musicStart(){
+        musicGameOver.prepare();
+        musicGameOver.start();
     }
 
     public GameOverDialog(Context context, GameStageActivity gameStageActivity) {
         super(context);
         this.gameStageActivity = gameStageActivity;
+        musicGameOver = new Music(gameStageActivity.getApplicationContext(), Music.MusicType.GAME_OVER_SOUND);
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {// 뒤로가기 누를시
+
+        }
+        return false;
     }
 
 }

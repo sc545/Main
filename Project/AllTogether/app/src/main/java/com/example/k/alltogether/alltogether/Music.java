@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.net.Uri;
 
 import com.example.k.alltogether.R;
 
@@ -11,23 +12,22 @@ import com.example.k.alltogether.R;
  * Created by K on 2015-11-14.
  */
 public class Music {
+    enum MusicType {MAIN_SOUND, BUBBLE_SOUND, BOMB_BUBBLE_SOUND, FEVER_SOUND, PAUSE_SOUND, GAME_OVER_SOUND};
     MediaPlayer mp = null;
     SoundPool sp = null;
-    int soundId1;
-    Music(Context co){
-        mp = MediaPlayer.create(co, R.raw.main_bgm);
-        //mp.setLooping(true);
-    }
-    Music(Context co, int musicNum){
+    Context co;
+    MusicType musicType;
+    int soundId;
+    Music(Context co, MusicType musicType){
+        this.co = co;
+        this.musicType = musicType;
         sp = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-        if(musicNum == 0)
-            soundId1 = sp.load(co, R.raw.bubble_bgm, 1);
     }
     void spStart(){
-        sp.play(soundId1, 1, 1, 0, 0, 1);
+        sp.play(soundId, 1, 1, 0, 0, 1);
     }
     void spStop(){
-        sp.stop(soundId1);
+        sp.stop(soundId);
     }
     void start(){
         mp.start();
@@ -43,6 +43,22 @@ public class Music {
     }
     void release(){
         mp.release();
+    }
+    void prepare(){
+        switch (musicType){
+            case MAIN_SOUND:
+                mp = MediaPlayer.create(co, R.raw.main_sound); mp.setLooping(true); break;
+            case BUBBLE_SOUND:
+                soundId = sp.load(co, R.raw.bubble_sound1, 1); break;
+            case BOMB_BUBBLE_SOUND:
+                soundId = sp.load(co, R.raw.bomb_bubble_sound, 1); break;
+            case FEVER_SOUND:
+                mp = MediaPlayer.create(co, R.raw.ferver_sound); mp.setLooping(true); break;
+            case PAUSE_SOUND:
+                soundId = sp.load(co, R.raw.pause_sound, 1); break;
+            case GAME_OVER_SOUND:
+                mp = MediaPlayer.create(co, R.raw.game_over_sound); mp.setLooping(true); mp.setVolume(100, 100);break;
+        }
     }
     boolean isPlaying(){
         return mp.isPlaying();

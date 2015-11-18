@@ -1,7 +1,9 @@
 package com.example.k.alltogether.alltogether;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -10,22 +12,23 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 
 /**
  * Created by K on 2015-11-17.
  */
-public class RankThread extends Thread {
-    static final String IP = "192.168.51.137"; // 192.168.51.141
+public class RankReadThread extends Thread {
+    static final String IP = "172.30.1.11"; // 192.168.51.141
     static int PORT = 1113;
     String name;
     int score;
     Handler handler;
     Context co;
-    RankThread(Context co, String name, int score){
+    TextView tvRank1;
+    RankReadThread(Context co, TextView tvRank1){
         handler = new Handler();
         this.co = co;
-        this.name = name;
-        this.score = score;
+        this.tvRank1 = tvRank1;
     }
     @Override
     public void run() {
@@ -37,19 +40,22 @@ public class RankThread extends Thread {
             OutputStream os = s.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(os);
 
-            oos.writeObject("write");
+            oos.writeObject("read");
 
-            oos.writeObject(name);
-            oos.writeObject(score);
+            name = (String) ois.readObject();
+            score = (int) ois.readObject();
 
             s.close();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         handler.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(co, "등록 완료", Toast.LENGTH_SHORT).show();
+                tvRank1.setText(name+", "+score);
+                Toast.makeText(co, "저장 완료", Toast.LENGTH_SHORT).show();
             }
         });
     }

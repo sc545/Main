@@ -20,6 +20,7 @@ public class MainActivity extends Activity {
     ImageButton btnHowTo, btnSetting, btnStart, btnRank;
     static Music music=null;
     HowToDialog howToDialog;
+    SettingDialog settingDialog;
     RankDialog rankDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +30,15 @@ public class MainActivity extends Activity {
         m_nScreenWidth = getApplicationContext().getResources().getDisplayMetrics().widthPixels; // 스마트폰 화면 사이즈 가져오는 함수
         m_nScreenHeight = getApplicationContext().getResources().getDisplayMetrics().heightPixels;
 
-        if(music == null)
-            music = new Music(MainActivity.this);
+        if(music == null) {
+            music = new Music(MainActivity.this, Music.MusicType.MAIN_SOUND);
+            music.prepare();
+        }
         if(!music.isPlaying())
             music.start();
 
         howToDialog = new HowToDialog(this);
+        settingDialog = new SettingDialog(this);
         rankDialog = new RankDialog(this);
 
         btnHowTo = (ImageButton) findViewById(R.id.btnHowTo);
@@ -52,7 +56,7 @@ public class MainActivity extends Activity {
         btnSetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                settingDialog.show();
             }
         });
 
@@ -73,11 +77,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void showHotTo(){
 
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View layout = inflater.inflate(R.layout.game_stage1, null);
-    }
 
     @Override
     protected void onDestroy() {

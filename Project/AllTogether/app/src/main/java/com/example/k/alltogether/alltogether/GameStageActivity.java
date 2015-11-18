@@ -35,6 +35,8 @@ public class GameStageActivity extends Activity {
     GameStageActivity gameStageActivity;
     GameStageActivity.GameView gameView;
 
+    Music m_musicFever;
+
     boolean m_bGameState; // 게임 진행 상태를 담을 변수
     boolean m_bThreadState; // 스레드 상태를 담을 변수
     boolean m_bFeverState; // 피버 상태를 담을 변수
@@ -49,7 +51,7 @@ public class GameStageActivity extends Activity {
     int m_nBubbleRadius; // 버블 반지름
     int m_nScore; // 게임 중 몇 점수를 담을 변수 선언
     int m_nCombo; // 게임 중 몇 콤보 수를 담을 변수 선언
-    int m_nFeverCombo; // 피버 콤보 변수
+    int m_nFeverGauge; // 피버 게이지 변수
     int m_nBubbleMaxSize; // 버블 최대 개수
     int m_iAnimationCount[]; // [0] bubble_in [1] bubble_out [2] bomb_bubble_in [3] bomb_bubble_out
 
@@ -62,6 +64,7 @@ public class GameStageActivity extends Activity {
 
 
     ArrayList<Bubble> m_arraylistBubble; // 게임 속에서 생성되는 버블 객체를 가지고 있을 ArrayList
+    ArrayList<Bubble> m_arraylistFeverBubble; // 게임 속에서 생성되는 버블 객체를 가지고 있을 ArrayList
     Bubble m_NewBubble, m_OldBubble; // 추가, 삭제 될 버블을 가지고 있을 변수
 
     Rect m_rectBubbleArea; // 버블 생성 영역
@@ -86,12 +89,14 @@ public class GameStageActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        MainActivity.music.start();
+//        MainActivity.musicBubble.start();
 
         /*
             멤버 변수 초기화
          */
         gameStageActivity=this;
+        m_musicFever = new Music(getApplicationContext(), Music.MusicType.FEVER_SOUND);
+        m_musicFever.prepare();
 
         m_bGameState =true; // GameStageActivity 가 생성 될 때 게임 진행 상태를 true 로 변경
         m_bThreadState = true;
@@ -104,6 +109,7 @@ public class GameStageActivity extends Activity {
         m_iAnimationCount = new int[4];
 
         m_arraylistBubble = new ArrayList<Bubble>(); // m_arraylistBubble 객체 생성
+        m_arraylistFeverBubble = new ArrayList<Bubble>();
 
         m_rectBubbleArea = new Rect();
 
@@ -167,12 +173,14 @@ public class GameStageActivity extends Activity {
      */
     public void resetState(){
         m_arraylistBubble.clear();
+        m_arraylistFeverBubble.clear();
         m_nScore =0;
         m_nCombo =0;
-        m_nFeverCombo = 0;
+        m_nFeverGauge = 0;
         m_bFeverState = false;
         m_bComboState = false;
         m_bBombBubbleState = false;
+        m_musicFever.prepare();
     }
 
     /*
@@ -313,11 +321,8 @@ public class GameStageActivity extends Activity {
             canvas.drawLine(m_rectBubbleArea.left, m_rectBubbleArea.top, m_rectBubbleArea.left, m_rectBubbleArea.bottom, paint);
             canvas.drawLine(m_rectBubbleArea.right, m_rectBubbleArea.top, m_rectBubbleArea.right, m_rectBubbleArea.bottom, paint);
             canvas.drawLine(m_rectBubbleArea.left, m_rectBubbleArea.bottom, m_rectBubbleArea.right, m_rectBubbleArea.bottom, paint);
-            /*
-                현재 버블 개수 만큼 프로그레스바 갱신
-             */
+
             int currentSize = m_arraylistBubble.size();
-//            pbLife.setProgress(currentSize);
 
             /*
                 체력, 피버 게이지 갱신
@@ -327,21 +332,26 @@ public class GameStageActivity extends Activity {
             else
                 ivLifeGauge.setImageDrawable(m_drawableLifeGauge[currentSize/2]);
 
-            if(m_nFeverCombo<=30)
-                ivFerverGauge.setImageDrawable(m_drawableFeverGauge[m_nFeverCombo]);
+            drawFeverGauge();
 
             /*
                 현재 m_arraylistBubble 에 존재하는 버블 그리기
              */
             if(m_bGameState){
-                for(int i=0; i<currentSize; i++) {
-                    Bubble bubble = m_arraylistBubble.get(i);
-                    if(bubble.isBombBubble)
-                        canvas.drawBitmap(bubble.m_btmpImgBombBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
-                    else if(m_bFeverState)
-                        canvas.drawBitmap(bubble.m_btmpImgFeverBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
-                    else
-                        canvas.drawBitmap(bubble.m_btmpImgBubble, bubble.x - bubble.bubbleR, bubble.y-bubble.bubbleR, paint);
+                if (m_bFeverState) {
+                    int currentFeverSize = m_arraylistFeverBubble.size();
+                    for(int i=0; i<currentFeverSize; i++) {
+                        Bubble bubble = m_arraylistFeverBubble.get(i);
+                        canvas.drawBitmap(bubble.m_btmpImgFeverBubble, bubble.x - bubble.bubbleR, bubble.y - bubble.bubbleR, paint);
+                    }
+                }else {
+                    for (int i = 0; i < currentSize; i++) {
+                        Bubble bubble = m_arraylistBubble.get(i);
+                        if (bubble.isBombBubble)
+                            canvas.drawBitmap(bubble.m_btmpImgBombBubble, bubble.x - bubble.bubbleR, bubble.y - bubble.bubbleR, paint);
+                        else
+                            canvas.drawBitmap(bubble.m_btmpImgBubble, bubble.x - bubble.bubbleR, bubble.y - bubble.bubbleR, paint);
+                    }
                 }
             }
             /*
@@ -387,13 +397,13 @@ public class GameStageActivity extends Activity {
             int py = (int) event.getY(); // 터치이벤트가 발생 했을때 y좌표값
 
             if (m_bFeverState) {
-                for (int i = m_arraylistBubble.size() - 1; 0 <= i; i--) { // 현재 존재하는 버블 객체 수 만큼 반복
-                    Bubble bubble = m_arraylistBubble.get(i);
+                for (int i = m_arraylistFeverBubble.size() - 1; 0 <= i; i--) { // 현재 존재하는 버블 객체 수 만큼 반복
+                    Bubble bubble = m_arraylistFeverBubble.get(i);
 
                     if (bubble.contains(px, py)) {
                         m_OldBubble = bubble;
-                        m_arraylistBubble.remove(bubble);
-                        m_nScore += 10 * ++m_nCombo;
+                        m_arraylistFeverBubble.remove(bubble);
+                        m_nScore += 50 + (50 * ++m_nCombo)*0.5;
                         m_bComboState = true;
                         m_bComboDraw = true;
 
@@ -401,11 +411,11 @@ public class GameStageActivity extends Activity {
                             m_bAnimationState[3] = true;
                             vibrator.vibrate(500);
                             m_bAnimationTempState = true;
-                            for (int j = m_arraylistBubble.size() - 1; 0 <= j; j--) {
-                                Bubble tmpBubble = m_arraylistBubble.get(j);
+                            for (int j = m_arraylistFeverBubble.size() - 1; 0 <= j; j--) {
+                                Bubble tmpBubble = m_arraylistFeverBubble.get(j);
                                 if (bubble.bombContains(tmpBubble.x, tmpBubble.y)) {
-                                    m_arraylistBubble.remove(j);
-                                    m_nScore += 10 * ++m_nCombo;
+                                    m_arraylistFeverBubble.remove(j);
+                                    m_nScore += 10 + (10 * ++m_nCombo)*0.5;
                                 }
                                 m_bAnimationTempState = false;
                             }
@@ -424,9 +434,8 @@ public class GameStageActivity extends Activity {
                         if (bubble.contains(px, py)) {
                             m_OldBubble = bubble;
                             m_arraylistBubble.remove(bubble);
-                            m_nScore += 10;
-                            ++m_nCombo;
-                            ++m_nFeverCombo;
+                            m_nScore += 100 + (100 * ++m_nCombo)*0.1;
+                            m_nFeverGauge += 200;
                             m_bComboState = true;
                             m_bComboDraw = true;
                             if(bubble.isBombBubble) {
@@ -437,8 +446,8 @@ public class GameStageActivity extends Activity {
                                     Bubble tmpBubble = m_arraylistBubble.get(j);
                                     if (bubble.bombContains(tmpBubble.x, tmpBubble.y)) {
                                         m_arraylistBubble.remove(j);
-                                        m_nScore += 10;
-                                        ++m_nCombo;
+                                        m_nFeverGauge += 200;
+                                        m_nScore += 100 + (100 * ++m_nCombo)*0.1;
                                     }
                                     m_bAnimationTempState = false;
                                 }
@@ -446,7 +455,7 @@ public class GameStageActivity extends Activity {
                                 m_bAnimationState[1] = true;
                             }
 
-                            if(m_nFeverCombo >= 30){
+                            if(m_nFeverGauge >= 31000){
                                 Toast.makeText(getApplicationContext(), "Fever Time!!", Toast.LENGTH_SHORT).show();
                                 m_ThreadPoolExecutor.execute(new FeverThread(gameStageActivity));
                             }
@@ -458,7 +467,10 @@ public class GameStageActivity extends Activity {
                     }
                     if (!m_bComboState){
                         m_nCombo = 0;
-                        m_nFeverCombo = 0;
+                        if(m_nFeverGauge < 0)
+                            m_nFeverGauge = 0;
+                        else
+                            m_nFeverGauge -= 50;
                         m_ThreadPoolExecutor.execute(new ComboMissThread(gameStageActivity));
                     }
                     invalidate();
@@ -468,6 +480,42 @@ public class GameStageActivity extends Activity {
 
             return true;
         }
+    }
+
+    public void drawFeverGauge(){
+        if(m_nFeverGauge >=0 && m_nFeverGauge < 1000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[0]);
+        if(m_nFeverGauge >=1000 && m_nFeverGauge < 2000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[1]);
+        if(m_nFeverGauge >=2000 && m_nFeverGauge < 3000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[2]);
+        if(m_nFeverGauge >=3000 && m_nFeverGauge < 4000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[3]);
+        if(m_nFeverGauge >=4000 && m_nFeverGauge < 5000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[4]);
+        if(m_nFeverGauge >=5000 && m_nFeverGauge < 6000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[4]);
+        if(m_nFeverGauge >=6000 && m_nFeverGauge < 7000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[5]);
+        if(m_nFeverGauge >=7000 && m_nFeverGauge < 8000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[6]);
+        if(m_nFeverGauge >=8000 && m_nFeverGauge < 9000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[7]);
+        if(m_nFeverGauge >=9000 && m_nFeverGauge < 10000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[8]);
+        if(m_nFeverGauge >=10000 && m_nFeverGauge < 11000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[9]);
+        if(m_nFeverGauge >=11000 && m_nFeverGauge < 12000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[10]);
+        if(m_nFeverGauge >=12000 && m_nFeverGauge < 13000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[11]);
+        if(m_nFeverGauge >=13000 && m_nFeverGauge < 14000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[12]);
+        if(m_nFeverGauge >=14000 && m_nFeverGauge < 15000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[13]);
+        if(m_nFeverGauge >=15000 && m_nFeverGauge < 16000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[14]);
+        if(m_nFeverGauge >=16000 && m_nFeverGauge < 17000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[15]);
+        if(m_nFeverGauge >=17000 && m_nFeverGauge < 18000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[16]);
+        if(m_nFeverGauge >=18000 && m_nFeverGauge < 19000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[17]);
+        if(m_nFeverGauge >=19000 && m_nFeverGauge < 20000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[18]);
+        if(m_nFeverGauge >=20000 && m_nFeverGauge < 21000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[19]);
+        if(m_nFeverGauge >=21000 && m_nFeverGauge < 22000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[20]);
+        if(m_nFeverGauge >=22000 && m_nFeverGauge < 23000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[21]);
+        if(m_nFeverGauge >=23000 && m_nFeverGauge < 24000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[22]);
+        if(m_nFeverGauge >=24000 && m_nFeverGauge < 25000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[23]);
+        if(m_nFeverGauge >=25000 && m_nFeverGauge < 26000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[24]);
+        if(m_nFeverGauge >=26000 && m_nFeverGauge < 27000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[25]);
+        if(m_nFeverGauge >=27000 && m_nFeverGauge < 28000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[26]);
+        if(m_nFeverGauge >=28000 && m_nFeverGauge < 29000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[27]);
+        if(m_nFeverGauge >=29000 && m_nFeverGauge < 30000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[28]);
+        if(m_nFeverGauge >=30000 && m_nFeverGauge < 31000 ) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[29]);
+        if(m_nFeverGauge >=31000) ivFerverGauge.setImageDrawable(m_drawableFeverGauge[30]);
+
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
