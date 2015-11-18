@@ -17,8 +17,10 @@ import com.example.k.alltogether.R;
 
 public class MainActivity extends Activity {
     int m_nScreenWidth, m_nScreenHeight; // 스마트폰 화면 사이즈를 담을 변수
-    ImageButton btnHowTo, btnSetting, btnStart;
+    ImageButton btnHowTo, btnSetting, btnStart, btnRank;
     static Music music=null;
+    HowToDialog howToDialog;
+    RankDialog rankDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,14 +34,18 @@ public class MainActivity extends Activity {
         if(!music.isPlaying())
             music.start();
 
+        howToDialog = new HowToDialog(this);
+        rankDialog = new RankDialog(this);
+
         btnHowTo = (ImageButton) findViewById(R.id.btnHowTo);
         btnSetting = (ImageButton) findViewById(R.id.btnSetting);
         btnStart = (ImageButton) findViewById(R.id.btnStart);
+        btnRank = (ImageButton) findViewById(R.id.btnRank);
 
         btnHowTo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                howToDialog.show();
             }
         });
 
@@ -56,6 +62,13 @@ public class MainActivity extends Activity {
                 Intent i = new Intent(getApplicationContext(), GameStageActivity.class);
                 startActivity(i);
                 finish();
+            }
+        });
+
+        btnRank.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rankDialog.show();
             }
         });
     }

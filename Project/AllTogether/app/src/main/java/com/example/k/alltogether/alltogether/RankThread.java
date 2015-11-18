@@ -15,7 +15,7 @@ import java.net.Socket;
  * Created by K on 2015-11-17.
  */
 public class RankThread extends Thread {
-    static final String IP = "192.168.51.141";
+    static final String IP = "192.168.51.137"; // 192.168.51.141
     static int PORT = 1113;
     String name;
     int score;

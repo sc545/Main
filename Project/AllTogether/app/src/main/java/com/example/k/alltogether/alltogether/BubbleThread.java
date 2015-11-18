@@ -118,7 +118,6 @@ public class BubbleThread extends Thread {
             public void run() {
                 gameView.invalidate(); // 핸들러를 통해서 화면 갱신
                 if (arrayList.size() == gameStageActivity.m_nBubbleMaxSize) { // 게임 실패시
-                    gameStageActivity.resetState();
                     gameStageActivity.m_bGameState = false;
                     gameOverDialog.show();
                 }
@@ -196,7 +195,6 @@ public class BubbleThread extends Thread {
             public void run() {
                 gameView.invalidate(); // 핸들러를 통해서 화면 갱신
                 if (arrayList.size() == gameStageActivity.m_nBubbleMaxSize) { // 게임 실패시
-                    gameStageActivity.resetState();
                     gameStageActivity.m_bGameState = false;
                     gameOverDialog.show();
                 }
