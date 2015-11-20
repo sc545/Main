@@ -9,26 +9,25 @@ public class AnimationThread extends Thread{
     Handler handler; // 핸들러 사용 이유 : 메인스레드를 제외하고는 View 를 건드릴 수 없기 때문에 핸들러를 통해서 화면 갱신 => invalidate()
     GameStageActivity gameStageActivity;
     GameStageActivity.GameView gameView;
-    Music musicBubble, musicBombBubble;
+
     public AnimationThread(GameStageActivity gameStageActivity) {
         handler = new Handler();
         this. gameStageActivity =gameStageActivity;
         gameView = gameStageActivity.gameView;
-        musicBubble = new Music(gameStageActivity.getApplicationContext(), Music.MusicType.BUBBLE_SOUND);
-        musicBubble.prepare();
-        musicBombBubble = new Music(gameStageActivity.getApplicationContext(), Music.MusicType.BOMB_BUBBLE_SOUND);
-        musicBombBubble.prepare();
     }
     @Override
     public void run() {
-        while (gameStageActivity.m_bThreadState) {
-            if (gameStageActivity.m_bGameState) {
+//        while (gameStageActivity.m_bThreadState) {
+//            if (gameStageActivity.m_bGameState) {
+        /*
+            일반 버블 터질때 애니메이션
+         */
                 if (gameStageActivity.m_bAnimationState[1]) {
-                    musicBubble.spStart();
+                    if(gameStageActivity.m_bMusicEffectState) gameStageActivity.m_musicBubbleSound.spStart();
                     for (int i = 0; i < 4; i++) {
                         gameStageActivity.m_iAnimationCount[1] = i;
                         try {
-                            Thread.sleep(80);
+                            Thread.sleep(90);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -39,16 +38,19 @@ public class AnimationThread extends Thread{
                             }
                         });
                     }
-                    musicBubble.spStop();
+                    gameStageActivity.m_musicBubbleSound.spStop();
                     gameStageActivity.m_bComboDraw = false;
                     gameStageActivity.m_bAnimationState[1] = false;
                 }
+        /*
+            폭탄 버블 터질때 애니메이션
+         */
                 if (gameStageActivity.m_bAnimationState[3]) {
-                    musicBombBubble.spStart();
+                    if(gameStageActivity.m_bMusicEffectState) gameStageActivity.m_musicBombBubbleSound.spStart();
                     for (int i = 0; i < 5; i++) {
                         gameStageActivity.m_iAnimationCount[3] = i;
                         try {
-                            Thread.sleep(80);
+                            Thread.sleep(90);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -59,11 +61,11 @@ public class AnimationThread extends Thread{
                             }
                         });
                     }
-                    musicBombBubble.spStart();
+                    gameStageActivity.m_musicBombBubbleSound.spStop();
                     gameStageActivity.m_bComboDraw = false;
                     gameStageActivity.m_bAnimationState[3] = false;
                 }
-            }
-        }
+//            }
+//        }
     }
 }

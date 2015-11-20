@@ -35,7 +35,9 @@ public class GamePauseDialog extends Dialog {
         btnAgain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                gameStageActivity.startTimer();
                 dismiss();
+                if(gameStageActivity.m_bMusicBgmState) gameStageActivity.m_musicGameSound.start();
                 gameStageActivity.m_bGameState =true;
             }
         });
@@ -45,6 +47,7 @@ public class GamePauseDialog extends Dialog {
             public void onClick(View v) {
                 gameStageActivity.resetState();
                 dismiss();
+                if(gameStageActivity.m_bMusicBgmState) gameStageActivity.m_musicGameSound.start();
                 gameStageActivity.m_bGameState =true;
             }
         });
@@ -54,6 +57,8 @@ public class GamePauseDialog extends Dialog {
             public void onClick(View v) {
                 gameStageActivity.m_bThreadState =false;
                 Intent i = new Intent(gameStageActivity.getApplicationContext(), MainActivity.class);
+                i.putExtra("MusicBgmState", gameStageActivity.m_bMusicBgmState);
+                i.putExtra("MusicEffectState", gameStageActivity.m_bMusicEffectState);
                 gameStageActivity.startActivity(i);
                 gameStageActivity.finish();
                 dismiss();
@@ -68,6 +73,7 @@ public class GamePauseDialog extends Dialog {
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {// 뒤로가기 누를시
+            gameStageActivity.startTimer();
             dismiss();
             gameStageActivity.m_bGameState =true;
         }

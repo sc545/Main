@@ -9,6 +9,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
+import android.widget.ViewFlipper;
 
 import com.example.k.alltogether.R;
 
@@ -17,6 +18,8 @@ import com.example.k.alltogether.R;
  */
 public class HowToDialog extends Dialog {
     ImageButton btnExit, btnLeft, btnRight;
+    ViewFlipper vfHowTo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,11 +28,28 @@ public class HowToDialog extends Dialog {
         setContentView(R.layout.how_to_dialog);
 
         btnExit = (ImageButton) findViewById(R.id.btnExit);
+        btnLeft = (ImageButton) findViewById(R.id.btnLeft);
+        btnRight = (ImageButton) findViewById(R.id.btnRight);
+        vfHowTo = (ViewFlipper) findViewById(R.id.vfHowTo);
 
         btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dismiss();
+            }
+        });
+
+        btnLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vfHowTo.showPrevious();
+            }
+        });
+
+        btnRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vfHowTo.showNext();
             }
         });
 

@@ -36,6 +36,8 @@ public class SelectModeDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(mainActivity.getApplicationContext(), GameStageActivity.class);
+                i.putExtra("MusicBgmState", mainActivity.m_bMusicBgmState);
+                i.putExtra("MusicEffectState", mainActivity.m_bMusicEffectState);
                 mainActivity.startActivity(i);
                 mainActivity.finish();
             }
@@ -44,7 +46,10 @@ public class SelectModeDialog extends Dialog {
         btnMode2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent i = new Intent(mainActivity.getApplicationContext(), SelectImageActivity.class);
+                i.putExtra("screenWidth", mainActivity.m_nScreenWidth);
+                mainActivity.startActivity(i);
+                mainActivity.finish();
             }
         });
 

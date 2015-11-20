@@ -9,10 +9,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import com.example.k.alltogether.R;
 
@@ -23,12 +20,6 @@ import com.example.k.alltogether.R;
 public class GameOverDialog extends Dialog {
     GameStageActivity gameStageActivity;
     ImageButton btnReplay, btnMain;
-    EditText etName;
-    TextView tvScore;
-    Button btnSubmit;
-    Music musicGameOver;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,17 +31,12 @@ public class GameOverDialog extends Dialog {
 
         btnReplay = (ImageButton) findViewById(R.id.btnGameOverRePlay);
         btnMain = (ImageButton) findViewById(R.id.btnGameOverMain);
-        etName = (EditText) findViewById(R.id.etName);
-        tvScore = (TextView) findViewById(R.id.tvScore);
-        btnSubmit = (Button) findViewById(R.id.btnSubmit);
-
-        tvScore.setText(""+gameStageActivity.m_nScore);
 
         btnReplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 gameStageActivity.resetState();
-                musicGameOver.stop();
+                gameStageActivity.m_musicGameOverSound.stop();
                 dismiss();
                 gameStageActivity.m_bGameState = true;
             }
@@ -61,31 +47,21 @@ public class GameOverDialog extends Dialog {
             public void onClick(View v) {
                 gameStageActivity.m_bThreadState =false;
                 Intent i = new Intent(gameStageActivity.getApplicationContext(), MainActivity.class);
+                i.putExtra("MusicBgmState", gameStageActivity.m_bMusicBgmState);
+                i.putExtra("MusicEffectState", gameStageActivity.m_bMusicEffectState);
                 gameStageActivity.startActivity(i);
                 gameStageActivity.finish();
-                musicGameOver.stop();
+                gameStageActivity.m_musicGameOverSound.stop();
                 dismiss();
             }
         });
 
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RankWriteThread rankWriteThread = new RankWriteThread(gameStageActivity.getApplicationContext(), etName.getText().toString(), gameStageActivity.m_nScore);
-                rankWriteThread.start();
-            }
-        });
-    }
 
-    public void musicStart(){
-        musicGameOver.prepare();
-        musicGameOver.start();
     }
 
     public GameOverDialog(Context context, GameStageActivity gameStageActivity) {
         super(context);
         this.gameStageActivity = gameStageActivity;
-        musicGameOver = new Music(gameStageActivity.getApplicationContext(), Music.MusicType.GAME_OVER_SOUND);
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {

@@ -11,7 +11,7 @@ public class Bubble {
     int bubbleR, bombBubbleR;
     boolean isBombBubble;
     Bitmap m_btmpImgBubble, m_btmpImgFeverBubble, m_btmpImgBombBubble;
-    Bitmap m_btmpBubbleAnimation[][], m_btmpBombBubbleInAnimation[], m_btmpBombBubbleOutAnimation[];
+    Bitmap m_btmpBubbleAnimation[][], m_btmpFeverBubbleAnimation[][], m_btmpBombBubbleInAnimation[], m_btmpBombBubbleOutAnimation[];
 
     public Bubble(int x, int y, int r, GameStageActivity gameStageActivity){ // 일반 버블 생성자
         this.x = x;
@@ -21,6 +21,7 @@ public class Bubble {
         m_btmpImgFeverBubble = gameStageActivity.m_btmpImgFeverBubble;
         m_btmpImgBombBubble = gameStageActivity.m_btmpImgBombBubble;
         m_btmpBubbleAnimation = gameStageActivity.m_btmpBubbleAnimation;
+        m_btmpFeverBubbleAnimation = gameStageActivity.m_btmpFeverBubbleAnimation;
         m_btmpBombBubbleInAnimation = gameStageActivity.m_btmpBombBubbleInAnimation;
         m_btmpBombBubbleOutAnimation = gameStageActivity.m_btmpBombBubbleOutAnimation;
     }
@@ -35,6 +36,7 @@ public class Bubble {
         m_btmpImgFeverBubble = gameStageActivity.m_btmpImgFeverBubble;
         m_btmpImgBombBubble = gameStageActivity.m_btmpImgBombBubble;
         m_btmpBubbleAnimation = gameStageActivity.m_btmpBubbleAnimation;
+        m_btmpFeverBubbleAnimation = gameStageActivity.m_btmpFeverBubbleAnimation;
         m_btmpBombBubbleInAnimation = gameStageActivity.m_btmpBombBubbleInAnimation;
         m_btmpBombBubbleOutAnimation = gameStageActivity.m_btmpBombBubbleOutAnimation;
     }

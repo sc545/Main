@@ -18,17 +18,19 @@ import java.util.HashMap;
  * Created by K on 2015-11-17.
  */
 public class RankReadThread extends Thread {
-    static final String IP = "172.30.1.11"; // 192.168.51.141
+    static final String IP = "172.30.1.12"; // 192.168.51.141
     static int PORT = 1113;
-    String name;
-    int score;
+    String name[];
+    int score[];
     Handler handler;
     Context co;
-    TextView tvRank1;
-    RankReadThread(Context co, TextView tvRank1){
+    TextView tvRank[];
+    RankReadThread(Context co, TextView tvRank[]){
         handler = new Handler();
         this.co = co;
-        this.tvRank1 = tvRank1;
+        this.tvRank = tvRank;
+        name = new String[10];
+        score = new int[10];
     }
     @Override
     public void run() {
@@ -42,8 +44,8 @@ public class RankReadThread extends Thread {
 
             oos.writeObject("read");
 
-            name = (String) ois.readObject();
-            score = (int) ois.readObject();
+            name = (String[]) ois.readObject();
+            score = (int[]) ois.readObject();
 
             s.close();
         } catch (IOException e) {
@@ -54,8 +56,9 @@ public class RankReadThread extends Thread {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                tvRank1.setText(name+", "+score);
-                Toast.makeText(co, "저장 완료", Toast.LENGTH_SHORT).show();
+                for(int i=0; i<10; i++){
+                    tvRank[i].setText(name[i]+", "+score[i]);
+                }
             }
         });
     }

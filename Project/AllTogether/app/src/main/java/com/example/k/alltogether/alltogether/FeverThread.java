@@ -12,18 +12,19 @@ public class FeverThread extends Thread {
     public FeverThread(GameStageActivity gameStageActivity){
         handler = new Handler();
         this.gameStageActivity = gameStageActivity;
-        musicFever = gameStageActivity.m_musicFever;
+        musicFever = gameStageActivity.m_musicFeverSound;
     }
     public void run(){
         gameStageActivity.m_bFeverState = true;
-        musicFever.start();
+        if(gameStageActivity.m_bMusicEffectState) musicFever.start();
         try {
             Thread.sleep(10000);
         }catch (InterruptedException e) {
             e.printStackTrace();
         }
         musicFever.pause();
-        gameStageActivity.m_nFeverGauge = 0;
-        gameStageActivity.m_bFeverState = false;
+        if(gameStageActivity != null) gameStageActivity.m_nFeverGauge = 0;
+        if(gameStageActivity != null) gameStageActivity.m_bFeverState = false;
+        if(gameStageActivity != null) if(gameStageActivity.m_bMusicBgmState) gameStageActivity.m_musicGameSound.start();
     }
 }
