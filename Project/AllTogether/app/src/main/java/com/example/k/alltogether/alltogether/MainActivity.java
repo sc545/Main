@@ -22,10 +22,14 @@ public class MainActivity extends Activity {
     HowToDialog howToDialog;
     SettingDialog settingDialog;
     RankDialog rankDialog;
+    SelectModeDialog selectModeDialog;
+    MainActivity mainActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+        mainActivity = this;
 
         m_nScreenWidth = getApplicationContext().getResources().getDisplayMetrics().widthPixels; // 스마트폰 화면 사이즈 가져오는 함수
         m_nScreenHeight = getApplicationContext().getResources().getDisplayMetrics().heightPixels;
@@ -40,6 +44,7 @@ public class MainActivity extends Activity {
         howToDialog = new HowToDialog(this);
         settingDialog = new SettingDialog(this);
         rankDialog = new RankDialog(this);
+        selectModeDialog = new SelectModeDialog(this, mainActivity);
 
         btnHowTo = (ImageButton) findViewById(R.id.btnHowTo);
         btnSetting = (ImageButton) findViewById(R.id.btnSetting);
@@ -63,9 +68,7 @@ public class MainActivity extends Activity {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), GameStageActivity.class);
-                startActivity(i);
-                finish();
+                selectModeDialog.show();
             }
         });
 

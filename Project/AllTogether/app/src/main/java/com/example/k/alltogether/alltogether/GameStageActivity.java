@@ -58,7 +58,7 @@ public class GameStageActivity extends Activity {
     /*
         버블 관련 Bitmap 변수 선언
      */
-    Bitmap m_btmpImgBubble, m_btmpImgBombBubble, m_btmpImgFeverBubble, m_btmpComboMiss;
+    Bitmap m_btmpImgBubble, m_btmpImgBombBubble, m_btmpImgFeverBubble, m_btmpImgCustomBubble, m_btmpComboMiss;
     Bitmap m_btmpBubbleAnimation[][], m_btmpBombBubbleInAnimation[], m_btmpBombBubbleOutAnimation[];
     Drawable m_drawableFeverGauge[], m_drawableLifeGauge[];
 
@@ -235,6 +235,7 @@ public class GameStageActivity extends Activity {
             m_btmpImgBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bubble); // 버블 이미지 등록
             m_btmpImgFeverBubble = BitmapFactory.decodeResource(getResources(), R.drawable.fever_bubble); // 피버 버블 이미지 등록
             m_btmpImgBombBubble = BitmapFactory.decodeResource(getResources(), R.drawable.bomb_bubble); // 폭탄 버블 이미지 등록
+
             m_btmpComboMiss = BitmapFactory.decodeResource(getResources(), R.drawable.combo_miss);
             m_btmpImgBubble = Bitmap.createScaledBitmap(m_btmpImgBubble, m_nBubbleRadius * 2, m_nBubbleRadius * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
             m_btmpImgFeverBubble = Bitmap.createScaledBitmap(m_btmpImgFeverBubble, m_nBubbleRadius * 2, m_nBubbleRadius * 2, false); // 버블 반지름에 맞게 버블 이미지 조정
