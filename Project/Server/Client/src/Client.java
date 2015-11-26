@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class Client {
-	static final String IP = "192.168.53.173"; // 192.168.51.141
+	static final String IP = "192.168.131.220"; // 192.168.51.141
     static int PORT = 1113;
     
 	public static void main(String[] args) {
@@ -23,7 +23,7 @@ public class Client {
 			oos = new ObjectOutputStream(os);
 			oos.writeObject("write");
 
-	        oos.writeObject("xyz");
+	        oos.writeObject("111");
 	        oos.writeObject(54867);
 	        s.close();
 		} catch (IOException e) {

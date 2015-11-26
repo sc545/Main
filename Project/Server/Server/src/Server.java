@@ -12,6 +12,10 @@ import java.sql.Statement;
 
 
 public class Server {
+	static private String driverName = "com.mysql.jdbc.Driver";
+	private static String url = "jdbc:mysql://localhost:3306/test?useUnicode=yes&characterEncoding=euckr";
+	private static String userName = "test";
+	private static String passwd = "";
 	public static void main(String[] args) throws Exception {
 		int PORT = 1113;
 		String name[] = new String[10];
@@ -19,9 +23,9 @@ public class Server {
 		
 		while(true){
 			ServerSocket ss = new ServerSocket(PORT);
-			System.out.println("¼ÒÄÏ È°¼ºÈ­!!");
+			System.out.println("ì†Œì¼“í™œì„±í™”");
 			Socket s = ss.accept();
-			System.out.println("¼ÒÄÏ ¿¬°á!!");
+			System.out.println("ì†Œì¼“ì—°ê²°!!");
 			OutputStream os = s.getOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(os);
 			InputStream is = s.getInputStream();
@@ -34,17 +38,18 @@ public class Server {
 			Statement st=null;
 			ResultSet rs=null;
 			try{
-				Class.forName("com.mysql.jdbc.Driver");
+				Class.forName(driverName);
 			}catch(ClassNotFoundException ce){
 				System.out.println(ce);
-				System.out.println("Å¬·¡½º ·Îµå ºÒ°¡");
+				System.out.println("ë“œë¼ì´ë²„ë¡œë“œ ì‹¤íŒ¨");
 			}
 			if(flag.equals("read")){
-				System.out.println("·©Å· °Ë»ö");
+				System.out.println("ì½ê¸°");
 				try{
-					connect = DriverManager.getConnection("jdbc:mysql://localhost:3306/test","Alltogether", "");					
+					connect = DriverManager.getConnection(url, userName, passwd);					
 					
 					st = connect.createStatement();
+					st.executeUpdate("set names euckr");
 					rs = st.executeQuery("select * from rank order by score desc");
 					for(int i=0; i<10; i++){
 						if(rs.next()){
@@ -72,7 +77,7 @@ public class Server {
 				
 			}
 			if(flag.equals("write")){
-				System.out.println("·©Å· µî·Ï");
+				System.out.println("ì“°ê¸°");
 				try{
 					connect = DriverManager.getConnection("jdbc:mysql://localhost:3306/test","Alltogther", "");					
 					st = connect.createStatement();
@@ -83,7 +88,7 @@ public class Server {
 					
 					st.executeUpdate("insert into rank values ('"+tmpName+"', "+tmpScore+")");
 					System.out.println(name+" "+score);
-					System.out.println("µî·Ï¿Ï·á");
+				
 					
 					if(rs!=null)rs.close();
 					if(st!=null)st.close();
